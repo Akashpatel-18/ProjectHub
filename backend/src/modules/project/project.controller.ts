@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../../lib/prisma';
+import redis from '../../lib/redis';
 import { sendResponse } from '../../utils/response';
 import { createProjectSchema, updateProjectSchema } from './project.validation';
 import { subject } from '@casl/ability';
@@ -306,6 +307,9 @@ export const addProjectMember = async (req: Request, res: Response) => {
     }
   });
 
+  // Invalidate cache
+  await redis.del(`project:${projectId}:user:${userId}`).catch(() => null);
+
   return sendResponse(res, 201, true, 'Member added to project.', projectMember);
 };
 
@@ -352,6 +356,9 @@ export const updateProjectMemberRole = async (req: Request, res: Response) => {
     }
   });
 
+  // Invalidate cache
+  await redis.del(`project:${projectId}:user:${userId}`).catch(() => null);
+
   return sendResponse(res, 200, true, 'Project member role updated.', updated);
 };
 
@@ -389,6 +396,9 @@ export const removeProjectMember = async (req: Request, res: Response) => {
   await prisma.projectMember.delete({
     where: { projectId_userId: { projectId, userId } }
   });
+
+  // Invalidate cache
+  await redis.del(`project:${projectId}:user:${userId}`).catch(() => null);
 
   return sendResponse(res, 200, true, 'Member removed from project.');
 };

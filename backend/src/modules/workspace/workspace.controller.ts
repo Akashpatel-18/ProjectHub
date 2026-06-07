@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import prisma from "../../lib/prisma";
+import redis from "../../lib/redis";
 import { sendResponse } from "../../utils/response";
 import {
   createWorkspaceSchema,
   inviteMemberSchema,
   updateMemberRoleSchema,
 } from "./workspace.validation";
-import { sendWorkspaceInviteEmail } from "../../services/email.service";
+import { emailQueue } from "../../queues/email.queue";
 import { ENV } from "../../config/env";
 
 export const createWorkspace = async (req: Request, res: Response) => {
@@ -237,7 +238,7 @@ export const inviteMember = async (req: Request, res: Response) => {
 
   const inviteUrl = `${ENV.CLIENT_URL}/invite/${invite.token}`;
 
-  await sendWorkspaceInviteEmail({
+  await emailQueue.add("sendInvite", {
     toEmail: invite.email,
     inviterName: req.user.name,
     workspaceName: req.workspace.name,
@@ -388,6 +389,9 @@ export const updateMemberRole = async (req: Request, res: Response) => {
     include: { role: true },
   });
 
+  // Invalidate cache
+  await redis.del(`workspace:${req.workspace.id}:user:${userId}`).catch(() => null);
+
   return sendResponse(
     res,
     200,
@@ -467,6 +471,13 @@ export const removeMember = async (req: Request, res: Response) => {
   await prisma.workspaceMember.delete({
     where: { id: member.id },
   });
+
+  // Invalidate cache
+  await redis.del(`workspace:${req.workspace.id}:user:${userId}`).catch(() => null);
+  if (projectIds.length > 0) {
+    const projectKeys = projectIds.map(pid => `project:${pid}:user:${userId}`);
+    await redis.del(...projectKeys).catch(() => null);
+  }
 
   return sendResponse(
     res,

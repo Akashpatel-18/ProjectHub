@@ -6,7 +6,7 @@ import prisma from '../../lib/prisma';
 import { ENV } from '../../config/env';
 import { sendResponse } from '../../utils/response';
 import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.validation';
-import { sendPasswordResetEmail } from '../../services/email.service';
+import { emailQueue } from "../../queues/email.queue";
 
 const generateToken = (userId: string, email: string, name: string) => {
   const options: SignOptions = { expiresIn: ENV.JWT_EXPIRES_IN as SignOptions['expiresIn'] };
@@ -135,8 +135,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   const resetUrl = `${ENV.CLIENT_URL}/reset-password?token=${resetToken}`;
   
-  // Send via Resend
-  await sendPasswordResetEmail({
+  await emailQueue.add('sendReset', {
     toEmail: user.email,
     resetUrl,
   });

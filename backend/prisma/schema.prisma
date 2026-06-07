@@ -90,6 +90,8 @@ model WorkspaceMember {
   role        Role      @relation(fields: [roleId], references: [id])
 
   @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
 }
 
 // === WORKSPACE INVITES ===
@@ -121,6 +123,8 @@ model Project {
 
   tasks       Task[]
   members     ProjectMember[]
+
+  @@index([workspaceId])
 }
 
 // === PROJECT MEMBERS (Per-Project Role) ===
@@ -139,6 +143,8 @@ model ProjectMember {
   role      Role     @relation(fields: [roleId], references: [id])
 
   @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
 }
 
 // === TASKS ===
@@ -167,6 +173,10 @@ model Task {
   labels       TaskLabel[]
   watchers     TaskWatcher[]
   activityLogs ActivityLog[]
+
+  @@index([projectId])
+  @@index([workspaceId])
+  @@index([assigneeId])
 }
 
 // === SUBTASKS ===
@@ -178,6 +188,8 @@ model Subtask {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
 }
 
 // === COMMENTS ===
@@ -190,6 +202,9 @@ model Comment {
   updatedAt DateTime @updatedAt
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
 }
 
 // === ATTACHMENTS (Cloudinary) ===
@@ -249,6 +264,9 @@ model ActivityLog {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   task        Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
   actor       User?     @relation("Actor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([taskId])
 }
 
 // === NOTIFICATIONS ===

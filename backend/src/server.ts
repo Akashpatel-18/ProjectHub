@@ -3,6 +3,7 @@ import app from './app';
 import { ENV } from './config/env';
 import { initSocketServer } from './sockets/socket.server';
 import prisma from './lib/prisma';
+import { emailWorker } from './queues/email.queue';
 
 const httpServer = http.createServer(app);
 
@@ -38,12 +39,14 @@ const start = async () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n🛑 Shutting down gracefully...');
+  await emailWorker.close();
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   console.log('\n🛑 SIGTERM received. Shutting down...');
+  await emailWorker.close();
   await prisma.$disconnect();
   process.exit(0);
 });

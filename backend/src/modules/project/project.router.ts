@@ -65,7 +65,7 @@ router.post(
 );
 
 router.put(
-  '/:slug/projects/:projectId/members/:userId',
+  '/:slug/projects/:projectId/members/:userId/role',
   authenticate,
   withWorkspaceTenant,
   asyncHandler(updateProjectMemberRole)

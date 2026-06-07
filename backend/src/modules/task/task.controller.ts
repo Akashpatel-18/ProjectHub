@@ -1,30 +1,58 @@
-import { Request, Response } from 'express';
-import prisma from '../../lib/prisma';
-import { sendResponse } from '../../utils/response';
-import { createTaskSchema, updateTaskSchema, createSubtaskSchema, createCommentSchema } from './task.validation';
-import { subject } from '@casl/ability';
+import { Request, Response } from "express";
+import prisma from "../../lib/prisma";
+import redis from "../../lib/redis";
+import { sendResponse } from "../../utils/response";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  createSubtaskSchema,
+  createCommentSchema,
+} from "./task.validation";
+import { subject } from "@casl/ability";
 
 // Emit utility to keep code clean and dry
 const emitSocketEvent = (req: Request, eventName: string, payload: any) => {
-  const io = req.app.get('io');
+  const io = req.app.get("io");
   if (io && req.workspace) {
     io.to(req.workspace.slug).emit(eventName, payload);
   }
 };
 
 export const createTask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
 
   const validated = createTaskSchema.parse(req.body);
 
   // Check if project belongs to workspace
   const project = await prisma.project.findFirst({
-    where: { id: validated.projectId, workspaceId: req.workspace.id }
+    where: { id: validated.projectId, workspaceId: req.workspace.id },
   });
 
   if (!project) {
-    return sendResponse(res, 404, false, 'Project not found in this workspace.');
+    return sendResponse(
+      res,
+      404,
+      false,
+      "Project not found in this workspace.",
+    );
+  }
+
+  // CASL check
+  if (
+    !req.ability ||
+    req.ability.cannot(
+      "create",
+      subject("Task", { projectId: validated.projectId } as any),
+    )
+  ) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You do not have permission to create a task in this project.",
+    );
   }
 
   // Create task with relations
@@ -39,17 +67,23 @@ export const createTask = async (req: Request, res: Response) => {
       dueDate: validated.dueDate,
       assigneeId: validated.assigneeId,
       createdById: req.user.id,
-      labels: validated.labelIds ? {
-        create: validated.labelIds.map(labelId => ({ labelId }))
-      } : undefined
+      labels: validated.labelIds
+        ? {
+            create: validated.labelIds.map((labelId) => ({ labelId })),
+          }
+        : undefined,
     },
     include: {
-      assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      creator: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      assignee: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
+      creator: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
       labels: { include: { label: true } },
       subtasks: true,
-      _count: { select: { comments: true } }
-    }
+      _count: { select: { comments: true } },
+    },
   });
 
   // Create activity log
@@ -58,9 +92,9 @@ export const createTask = async (req: Request, res: Response) => {
       workspaceId: req.workspace.id,
       taskId: task.id,
       actorId: req.user.id,
-      action: 'TASK_CREATED',
-      metadata: JSON.stringify({ title: task.title })
-    }
+      action: "TASK_CREATED",
+      metadata: JSON.stringify({ title: task.title }),
+    },
   });
 
   // Send assignment notification
@@ -68,27 +102,28 @@ export const createTask = async (req: Request, res: Response) => {
     const notify = await prisma.notification.create({
       data: {
         userId: validated.assigneeId,
-        title: 'New Task Assigned',
+        title: "New Task Assigned",
         message: `${req.user.name} assigned you: "${task.title}"`,
-        type: 'TASK_ASSIGNED',
-        taskId: task.id
-      }
+        type: "TASK_ASSIGNED",
+        taskId: task.id,
+      },
     });
-    
+
     // Emit socket alert specifically to assigned user
-    const io = req.app.get('io');
+    const io = req.app.get("io");
     if (io) {
-      io.to(`user_${validated.assigneeId}`).emit('notification:new', notify);
+      io.to(`user_${validated.assigneeId}`).emit("notification:new", notify);
     }
   }
 
-  emitSocketEvent(req, 'task:created', task);
+  emitSocketEvent(req, "task:created", task);
 
-  return sendResponse(res, 201, true, 'Task created successfully.', task);
+  return sendResponse(res, 201, true, "Task created successfully.", task);
 };
 
 export const getTasks = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
 
   const { projectId, status, priority, assigneeId } = req.query;
 
@@ -98,80 +133,110 @@ export const getTasks = async (req: Request, res: Response) => {
       ...(projectId && { projectId: projectId as string }),
       ...(status && { status: status as string }),
       ...(priority && { priority: priority as string }),
-      ...(assigneeId && { assigneeId: assigneeId as string })
+      ...(assigneeId && { assigneeId: assigneeId as string }),
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     include: {
-      assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      creator: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      assignee: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
+      creator: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
       labels: { include: { label: true } },
       subtasks: true,
-      _count: { select: { comments: true } }
-    }
+      _count: { select: { comments: true } },
+    },
   });
 
-  // Filter tasks based on CASL abilities (crucial for Guest view restriction!)
-  const allowedTasks = tasks.filter(task => {
+  // Filter tasks based on CASL abilities (supports complex cannot overrides)
+  const allowedTasks = tasks.filter((task) => {
     if (!req.ability) return false;
-    return req.ability.can('read', subject('Task', task));
+    return req.ability.can("read", subject("Task", task));
   });
 
-  return sendResponse(res, 200, true, 'Tasks fetched successfully.', allowedTasks);
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Tasks fetched successfully.",
+    allowedTasks,
+  );
 };
 
 export const getTaskDetails = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
   const { taskId } = req.params;
 
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: {
       project: true,
-      assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      creator: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      labels: { include: { label: true } },
-      subtasks: { orderBy: { createdAt: 'asc' } },
-      comments: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          user: { select: { id: true, name: true, email: true, avatarUrl: true } }
-        }
+      assignee: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
       },
-      attachments: { orderBy: { createdAt: 'desc' } },
-      watchers: { include: { user: { select: { id: true, name: true, email: true } } } }
-    }
+      creator: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
+      labels: { include: { label: true } },
+      subtasks: { orderBy: { createdAt: "asc" } },
+      comments: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, avatarUrl: true },
+          },
+        },
+      },
+      attachments: { orderBy: { createdAt: "desc" } },
+      watchers: {
+        include: { user: { select: { id: true, name: true, email: true } } },
+      },
+    },
   });
 
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL check
-  if (!req.ability || !req.ability.can('read', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You do not have permission to view this task.');
+  if (!req.ability || !req.ability.can("read", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You do not have permission to view this task.",
+    );
   }
 
-  return sendResponse(res, 200, true, 'Task fetched successfully.', task);
+  return sendResponse(res, 200, true, "Task fetched successfully.", task);
 };
 
 export const updateTask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
   const { taskId } = req.params;
-  
+
   const validated = updateTaskSchema.parse(req.body);
 
   const task = await prisma.task.findUnique({
-    where: { id: taskId }
+    where: { id: taskId },
   });
 
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL check
-  if (!req.ability || !req.ability.can('update', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You do not have permission to update this task.');
+  if (!req.ability || !req.ability.can("update", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You do not have permission to update this task.",
+    );
   }
 
   // Check if labels are changing and sync many-to-many
@@ -179,7 +244,7 @@ export const updateTask = async (req: Request, res: Response) => {
     await prisma.taskLabel.deleteMany({ where: { taskId } });
     if (validated.labelIds.length > 0) {
       await prisma.taskLabel.createMany({
-        data: validated.labelIds.map(labelId => ({ taskId, labelId }))
+        data: validated.labelIds.map((labelId) => ({ taskId, labelId })),
       });
     }
   }
@@ -190,12 +255,16 @@ export const updateTask = async (req: Request, res: Response) => {
     where: { id: taskId },
     data: updateData,
     include: {
-      assignee: { select: { id: true, name: true, email: true, avatarUrl: true } },
-      creator: { select: { id: true, name: true, email: true, avatarUrl: true } },
+      assignee: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
+      creator: {
+        select: { id: true, name: true, email: true, avatarUrl: true },
+      },
       labels: { include: { label: true } },
       subtasks: true,
-      _count: { select: { comments: true } }
-    }
+      _count: { select: { comments: true } },
+    },
   });
 
   // Track activity logs for audits
@@ -213,172 +282,222 @@ export const updateTask = async (req: Request, res: Response) => {
         workspaceId: req.workspace.id,
         taskId,
         actorId: req.user.id,
-        action: 'TASK_UPDATED',
-        metadata: JSON.stringify(changes)
-      }
+        action: "TASK_UPDATED",
+        metadata: JSON.stringify(changes),
+      },
     });
 
     // Notify new assignee
-    if (updateData.assigneeId && updateData.assigneeId !== task.assigneeId && updateData.assigneeId !== req.user.id) {
+    if (
+      updateData.assigneeId &&
+      updateData.assigneeId !== task.assigneeId &&
+      updateData.assigneeId !== req.user.id
+    ) {
       const notify = await prisma.notification.create({
         data: {
           userId: updateData.assigneeId,
-          title: 'Task Assigned',
+          title: "Task Assigned",
           message: `${req.user.name} assigned you: "${updatedTask.title}"`,
-          type: 'TASK_ASSIGNED',
-          taskId
-        }
+          type: "TASK_ASSIGNED",
+          taskId,
+        },
       });
-      const io = req.app.get('io');
-      if (io) io.to(`user_${updateData.assigneeId}`).emit('notification:new', notify);
+      const io = req.app.get("io");
+      if (io)
+        io.to(`user_${updateData.assigneeId}`).emit("notification:new", notify);
     }
   }
 
-  emitSocketEvent(req, 'task:updated', updatedTask);
+  emitSocketEvent(req, "task:updated", updatedTask);
 
-  return sendResponse(res, 200, true, 'Task updated successfully.', updatedTask);
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Task updated successfully.",
+    updatedTask,
+  );
 };
 
 export const deleteTask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
   const { taskId } = req.params;
 
   const task = await prisma.task.findUnique({
-    where: { id: taskId }
+    where: { id: taskId },
   });
 
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL Check
-  if (!req.ability || !req.ability.can('delete', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You do not have permission to delete this task.');
+  if (!req.ability || !req.ability.can("delete", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You do not have permission to delete this task.",
+    );
   }
 
   await prisma.task.delete({
-    where: { id: taskId }
+    where: { id: taskId },
   });
 
   await prisma.activityLog.create({
     data: {
       workspaceId: req.workspace.id,
       actorId: req.user.id,
-      action: 'TASK_DELETED',
-      metadata: JSON.stringify({ title: task.title })
-    }
+      action: "TASK_DELETED",
+      metadata: JSON.stringify({ title: task.title }),
+    },
   });
 
-  emitSocketEvent(req, 'task:deleted', { taskId });
+  emitSocketEvent(req, "task:deleted", { taskId });
 
-  return sendResponse(res, 200, true, 'Task deleted successfully.');
+  // Invalidate task projectId cache
+  await redis.del(`task:${taskId}:projectId`).catch(() => null);
+
+  return sendResponse(res, 200, true, "Task deleted successfully.");
 };
 
 // === SUBTASKS ===
 
 export const createSubtask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
   const { taskId } = req.params;
   const validated = createSubtaskSchema.parse(req.body);
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL Check
-  if (!req.ability || !req.ability.can('update', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You cannot manage subtasks on this task.');
+  if (!req.ability || !req.ability.can("update", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You cannot manage subtasks on this task.",
+    );
   }
 
   const subtask = await prisma.subtask.create({
     data: {
       taskId,
-      title: validated.title
-    }
+      title: validated.title,
+    },
   });
 
-  emitSocketEvent(req, 'task:updated', { taskId }); // Trigger a reload on clients
+  emitSocketEvent(req, "subtask:created", subtask);
 
-  return sendResponse(res, 201, true, 'Subtask added successfully.', subtask);
+  return sendResponse(res, 201, true, "Subtask added successfully.", subtask);
 };
 
 export const toggleSubtask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
   const { taskId, subtaskId } = req.params;
   const { isCompleted } = req.body;
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL check
-  if (!req.ability || !req.ability.can('update', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You cannot edit this task.');
+  if (!req.ability || !req.ability.can("update", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You cannot edit this task.",
+    );
   }
 
   const updatedSubtask = await prisma.subtask.update({
     where: { id: subtaskId, taskId },
-    data: { isCompleted: !!isCompleted }
+    data: { isCompleted: !!isCompleted },
   });
 
-  emitSocketEvent(req, 'task:updated', { taskId });
+  emitSocketEvent(req, "subtask:updated", updatedSubtask);
 
-  return sendResponse(res, 200, true, 'Subtask updated successfully.', updatedSubtask);
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Subtask updated successfully.",
+    updatedSubtask,
+  );
 };
 
 export const deleteSubtask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
   const { taskId, subtaskId } = req.params;
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
-  if (!req.ability || !req.ability.can('update', subject('Task', task))) {
-    return sendResponse(res, 403, false, 'Forbidden. You cannot edit this task.');
+  if (!req.ability || !req.ability.can("update", subject("Task", task))) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You cannot edit this task.",
+    );
   }
 
   await prisma.subtask.delete({
-    where: { id: subtaskId, taskId }
+    where: { id: subtaskId, taskId },
   });
 
-  emitSocketEvent(req, 'task:updated', { taskId });
+  emitSocketEvent(req, "subtask:deleted", { taskId, subtaskId });
 
-  return sendResponse(res, 200, true, 'Subtask deleted successfully.');
+  return sendResponse(res, 200, true, "Subtask deleted successfully.");
 };
 
 // === COMMENTS ===
 
 export const createComment = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
   const { taskId } = req.params;
   const validated = createCommentSchema.parse(req.body);
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   // CASL check
-  if (!req.ability || !req.ability.can('create', 'Comment')) {
-    return sendResponse(res, 403, false, 'Forbidden. You cannot comment on this task.');
+  if (!req.ability || !req.ability.can("create", "Comment")) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Forbidden. You cannot comment on this task.",
+    );
   }
 
   const comment = await prisma.comment.create({
     data: {
       taskId,
       userId: req.user.id,
-      content: validated.content
+      content: validated.content,
     },
     include: {
-      user: { select: { id: true, name: true, email: true, avatarUrl: true } }
-    }
+      user: { select: { id: true, name: true, email: true, avatarUrl: true } },
+    },
   });
 
   // Notify assignee
@@ -386,40 +505,41 @@ export const createComment = async (req: Request, res: Response) => {
     const notify = await prisma.notification.create({
       data: {
         userId: task.assigneeId,
-        title: 'New Comment Added',
+        title: "New Comment Added",
         message: `${req.user.name} commented on: "${task.title}"`,
-        type: 'TASK_COMMENT',
-        taskId
-      }
+        type: "TASK_COMMENT",
+        taskId,
+      },
     });
-    const io = req.app.get('io');
-    if (io) io.to(`user_${task.assigneeId}`).emit('notification:new', notify);
+    const io = req.app.get("io");
+    if (io) io.to(`user_${task.assigneeId}`).emit("notification:new", notify);
   }
 
-  emitSocketEvent(req, 'comment:created', comment);
+  emitSocketEvent(req, "comment:created", comment);
 
-  return sendResponse(res, 201, true, 'Comment added successfully.', comment);
+  return sendResponse(res, 201, true, "Comment added successfully.", comment);
 };
 
 // === WATCHERS ===
 
 export const toggleWatchTask = async (req: Request, res: Response) => {
-  if (!req.workspace) return sendResponse(res, 444, false, 'Workspace not found.');
-  if (!req.user) return sendResponse(res, 401, false, 'Not authenticated.');
+  if (!req.workspace)
+    return sendResponse(res, 444, false, "Workspace not found.");
+  if (!req.user) return sendResponse(res, 401, false, "Not authenticated.");
   const { taskId } = req.params;
 
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task || task.workspaceId !== req.workspace.id) {
-    return sendResponse(res, 404, false, 'Task not found.');
+    return sendResponse(res, 404, false, "Task not found.");
   }
 
   const isWatching = await prisma.taskWatcher.findUnique({
     where: {
       taskId_userId: {
         taskId,
-        userId: req.user.id
-      }
-    }
+        userId: req.user.id,
+      },
+    },
   });
 
   if (isWatching) {
@@ -427,18 +547,29 @@ export const toggleWatchTask = async (req: Request, res: Response) => {
       where: {
         taskId_userId: {
           taskId,
-          userId: req.user.id
-        }
-      }
+          userId: req.user.id,
+        },
+      },
     });
-    return sendResponse(res, 200, true, 'You stopped watching this task.', { watching: false });
+    emitSocketEvent(req, "task:watcher:updated", { taskId, userId: req.user.id, watching: false });
+    return sendResponse(res, 200, true, "You stopped watching this task.", {
+      watching: false,
+    });
   } else {
     await prisma.taskWatcher.create({
       data: {
         taskId,
-        userId: req.user.id
-      }
+        userId: req.user.id,
+      },
     });
-    return sendResponse(res, 200, true, 'You are now watching this task.', { watching: true });
+    emitSocketEvent(req, "task:watcher:updated", { 
+      taskId, 
+      userId: req.user.id, 
+      watching: true,
+      user: { name: req.user.name } // Include name for the frontend UI
+    });
+    return sendResponse(res, 200, true, "You are now watching this task.", {
+      watching: true,
+    });
   }
 };
