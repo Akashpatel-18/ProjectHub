@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Rocket, LogOut, Loader2, Link2 } from 'lucide-react';
+import { Rocket, Loader2, Briefcase, LogOut, Link2 } from 'lucide-react';
 
 import api from '../lib/axios';
 import { useAuthStore } from '../store/auth.store';
@@ -35,7 +35,7 @@ export default function OnboardingPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user, logout } = useAuthStore();
-  
+
   const [joinToken, setJoinToken] = useState('');
 
   const form = useForm<WorkspaceFormValues>({
@@ -86,14 +86,14 @@ export default function OnboardingPage() {
   const handleJoinWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinToken.trim()) return;
-    
+
     // Extract token if they pasted a full URL
     let token = joinToken.trim();
     if (token.includes('/invite/')) {
       const parts = token.split('/invite/');
       token = parts[parts.length - 1].split('?')[0].replace('/', '');
     }
-    
+
     navigate(`/invite/${token}`);
   };
 
@@ -112,12 +112,12 @@ export default function OnboardingPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 backdrop-blur-sm">
-            <Rocket className="w-6 h-6 text-primary" />
+          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/25">
+            <Briefcase className="w-8 h-8 text-primary-foreground" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-          Welcome, {user?.name?.split(' ')[0]}!
+          Welcome to ProjectHub
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Let's get you set up. Choose an option below to start collaborating.
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl relative z-10 grid gap-6 px-4 sm:px-0">
-        
+
         {/* Create Workspace Card */}
         <Card className="border-border/50 bg-card/50 backdrop-blur-xl shadow-2xl">
           <CardHeader>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
                     <FormItem>
                       <FormLabel>Workspace Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Acme Corp" className="bg-background/50" {...field} />
+                        <Input placeholder="ProjectHub Corp" className="bg-background/50" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -161,15 +161,15 @@ export default function OnboardingPage() {
                           <span className="px-3 py-2 bg-secondary/50 border border-r-0 border-border rounded-l-md text-muted-foreground text-sm shrink-0">
                             app.com/w/
                           </span>
-                          <Input className="rounded-l-none bg-background/50 focus-visible:ring-offset-0 focus-visible:z-10" placeholder="acme-corp" {...field} />
+                          <Input className="rounded-l-none bg-background/50 focus-visible:ring-offset-0 focus-visible:z-10" placeholder="projecthub-corp" {...field} />
                         </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full"
                   disabled={createWorkspaceMutation.isPending}
                 >
@@ -195,9 +195,9 @@ export default function OnboardingPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleJoinWorkspace} className="flex flex-col sm:flex-row gap-3">
-              <Input 
-                placeholder="Paste invite link or token..." 
-                className="bg-background/50 flex-1" 
+              <Input
+                placeholder="Paste invite link or token..."
+                className="bg-background/50 flex-1"
                 value={joinToken}
                 onChange={(e) => setJoinToken(e.target.value)}
               />

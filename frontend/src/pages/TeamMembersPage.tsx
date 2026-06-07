@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Users, UserPlus, Search, Loader2 } from 'lucide-react';
 
-import { useWorkspaceMembersQuery, useRemoveWorkspaceMemberMutation } from '@/services/member/member.queries';
+import { useWorkspaceMembersQuery, useRemoveWorkspaceMemberMutation, usePendingInvitesQuery } from '@/services/member/member.queries';
 import { useWorkspaceRolesQuery } from '@/services/workspace/workspace.queries';
 import { useWorkspaceRole } from '@/hooks/useWorkspaceRole';
 import { useAuthStore } from '@/store/auth.store';
@@ -25,6 +25,7 @@ export default function TeamMembersPage() {
 
   // ── Queries ──────────────────────────────────────────────────────────────────
   const { data: members, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug!);
+  const { data: invites, isLoading: loadingInvites } = usePendingInvitesQuery(slug!);
   const { data: roles } = useWorkspaceRolesQuery(slug!);
 
   const removeMutation = useRemoveWorkspaceMemberMutation(slug!);
@@ -41,6 +42,14 @@ export default function TeamMembersPage() {
       m.user?.name?.toLowerCase().includes(q) ||
       m.user?.email?.toLowerCase().includes(q) ||
       m.role?.name?.toLowerCase().includes(q)
+    );
+  }) ?? [];
+
+  const filteredInvites = invites?.filter((i: any) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      i.email?.toLowerCase().includes(q) ||
+      i.role?.name?.toLowerCase().includes(q)
     );
   }) ?? [];
 
@@ -97,6 +106,7 @@ export default function TeamMembersPage() {
       {/* Members Table */}
       <TeamMemberTable
         members={filteredMembers}
+        invites={filteredInvites}
         currentUser={currentUser}
         isOwner={isOwner}
         onRemove={handleRemove}

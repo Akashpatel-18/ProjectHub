@@ -258,6 +258,34 @@ export const inviteMember = async (req: Request, res: Response) => {
   return sendResponse(res, 200, true, "Invitation email sent successfully.");
 };
 
+export const getPendingInvites = async (req: Request, res: Response) => {
+  if (!req.workspace) return sendResponse(res, 444, false, "Workspace not found.");
+
+  const invites = await prisma.workspaceInvite.findMany({
+    where: {
+      workspaceId: req.workspace.id,
+      status: "PENDING",
+      expiresAt: { gt: new Date() }
+    },
+    include: {
+      invitedBy: {
+        select: { id: true, name: true, email: true, avatarUrl: true }
+      }
+    }
+  });
+
+  const roles = await prisma.role.findMany({
+    where: { OR: [{ workspaceId: null }, { workspaceId: req.workspace.id }] }
+  });
+
+  const invitesWithRoles = invites.map(inv => ({
+    ...inv,
+    role: roles.find(r => r.id === inv.roleId)
+  }));
+
+  return sendResponse(res, 200, true, "Pending invites fetched.", invitesWithRoles);
+};
+
 export const getInviteDetails = async (req: Request, res: Response) => {
   const { token } = req.params;
 

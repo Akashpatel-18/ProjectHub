@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { ENV } from './config/env';
 import { errorHandler } from './middleware/error.middleware';
+import rateLimit from 'express-rate-limit';
 
 // Routers
 import authRouter from './modules/auth/auth.router';
@@ -28,8 +29,27 @@ app.use(express.urlencoded({ extended: true }));
 // Serve locally uploaded files if Cloudinary is not configured
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
+// ─── Rate Limiting ────────────────────────────────────────────────────────────
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 500 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 auth requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many authentication attempts, please try again after 15 minutes' }
+});
+
+app.use('/api/', apiLimiter);
+
 // ─── API Routes ──────────────────────────────────────────────────────────────
-app.use('/api/auth', authRouter);
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/workspaces', workspaceRouter);
 app.use('/api/workspaces', projectRouter);
 app.use('/api/workspaces', taskRouter);

@@ -5,6 +5,10 @@ export const memberService = {
     const res = await api.get(`/workspaces/${slug}/members`);
     return res.data.data;
   },
+  getPendingInvites: async (slug: string) => {
+    const res = await api.get(`/workspaces/${slug}/invites`);
+    return res.data.data;
+  },
   getProjectMembers: async (slug: string, projectId: string) => {
     const res = await api.get(`/workspaces/${slug}/projects/${projectId}/members`);
     return res.data.data;

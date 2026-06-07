@@ -10,6 +10,14 @@ export const useWorkspaceMembersQuery = (slug?: string) => {
   });
 };
 
+export const usePendingInvitesQuery = (slug?: string) => {
+  return useQuery({
+    queryKey: ['invites', slug],
+    queryFn: () => memberService.getPendingInvites(slug!),
+    enabled: !!slug,
+  });
+};
+
 export const useProjectMembersQuery = (slug?: string, projectId?: string) => {
   return useQuery({
     queryKey: ['projectMembers', slug, projectId],
@@ -19,10 +27,12 @@ export const useProjectMembersQuery = (slug?: string, projectId?: string) => {
 };
 
 export const useInviteWorkspaceMemberMutation = (slug?: string) => {
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
     mutationFn: (data: { email: string; roleId: string }) => memberService.inviteWorkspaceMember(slug!, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites', slug] });
       toast({ title: 'Invitation Sent', description: 'An email invitation has been sent.' });
     },
     onError: (error: any) => {

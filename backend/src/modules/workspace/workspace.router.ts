@@ -10,6 +10,7 @@ import {
   acceptInvite,
   updateMemberRole,
   removeMember,
+  getPendingInvites,
 } from "./workspace.controller";
 import { authenticate } from "../../middleware/auth.middleware";
 import { withWorkspaceTenant } from "../../middleware/tenant.middleware";
@@ -39,6 +40,13 @@ router.get(
   withWorkspaceTenant,
   checkPermission("read", "WorkspaceMember"),
   asyncHandler(getWorkspaceMembers),
+);
+router.get(
+  "/:slug/invites",
+  authenticate,
+  withWorkspaceTenant,
+  checkPermission("read", "WorkspaceMember"),
+  asyncHandler(getPendingInvites),
 );
 router.get(
   "/:slug/roles",

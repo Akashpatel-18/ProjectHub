@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { Rocket, ShieldAlert, CheckCircle } from 'lucide-react';
+import { AlertCircle, ArrowRight, CheckCircle2, Loader2, Briefcase, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
 
 import api from '../lib/axios';
 import { useToast } from '../hooks/use-toast';
@@ -33,6 +34,7 @@ export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   const token = searchParams.get('token');
 
   const form = useForm<ResetFormValues>({
@@ -116,7 +118,7 @@ export default function ResetPasswordPage() {
       <Card className="w-full max-w-md relative z-10 border-border/50 bg-card/45 backdrop-blur-xl shadow-2xl animate-in zoom-in-95 duration-300">
         <CardHeader className="space-y-3 text-center pt-8">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 mb-2">
-            <Rocket className="w-6 h-6 text-primary" />
+            <Briefcase className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">
             Reset Password
@@ -136,7 +138,16 @@ export default function ResetPasswordPage() {
                   <FormItem>
                     <FormLabel>New Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="••••••••" type="password" {...field} className="bg-background/50 border-border/50 text-xs h-9" />
+                      <div className="relative">
+                        <Input placeholder="••••••••" type={showPassword ? "text" : "password"} {...field} className="bg-background/50 border-border/50 text-xs h-9 pr-10" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

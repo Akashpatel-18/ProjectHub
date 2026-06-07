@@ -18,7 +18,14 @@ import * as z from 'zod';
 
 import { useToast } from '../hooks/use-toast';
 import { useAuthStore } from '../store/auth.store';
-import { useWorkspaceMembersQuery, useWorkspaceRolesQuery, useInviteWorkspaceMemberMutation, useRemoveWorkspaceMemberMutation, useUpdateWorkspaceRoleMutation } from '@/services/member/member.queries';
+import { 
+  useWorkspaceMembersQuery, 
+  useWorkspaceRolesQuery, 
+  useInviteWorkspaceMemberMutation, 
+  useRemoveWorkspaceMemberMutation, 
+  useUpdateWorkspaceRoleMutation,
+  usePendingInvitesQuery
+} from '@/services/member/member.queries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -64,7 +71,8 @@ export default function WorkspaceSettingsPage() {
   });
 
   // Queries
-  const { data: members, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug);
+  const { data: members, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug!);
+  const { data: invites, isLoading: loadingInvites } = usePendingInvitesQuery(slug!);
   const { data: roles, isLoading: loadingRoles } = useWorkspaceRolesQuery(slug);
 
   // Mutations
@@ -300,6 +308,39 @@ export default function WorkspaceSettingsPage() {
                     </div>
                   );
                 })}
+                
+                {invites && invites.map((invite: any) => (
+                  <div 
+                    key={invite.id} 
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-border/30 bg-card/10 hover:border-border transition-colors duration-200 gap-3 opacity-80"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="w-10 h-10 border border-border">
+                        <AvatarFallback className="bg-secondary text-muted-foreground">
+                          <Mail className="w-4 h-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-sm text-foreground flex items-center gap-1.5">
+                          <span className="text-muted-foreground italic">Pending Invite</span>
+                          <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold">
+                            PENDING
+                          </Badge>
+                        </h4>
+                        <p className="text-xs text-muted-foreground truncate">{invite.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-[10px] font-semibold uppercase tracking-wider border ${getRoleBadgeStyle(invite.role?.name)}`}
+                      >
+                        {invite.role?.name}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

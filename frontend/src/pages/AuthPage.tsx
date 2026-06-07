@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Rocket, Mail, ShieldAlert } from 'lucide-react';
+import { Briefcase, Mail, Eye, EyeOff } from 'lucide-react';
 
 import api from '../lib/axios';
 import { useAuthStore } from '../store/auth.store';
@@ -35,6 +35,8 @@ export default function AuthPage() {
   const defaultEmail = searchParams.get('email') || '';
 
   const [mode, setMode] = useState<AuthMode>(defaultEmail ? 'signup' : 'login');
+  const [showPassword, setShowPassword] = useState(false);
+  
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
@@ -155,10 +157,10 @@ export default function AuthPage() {
       <Card className="w-full max-w-md relative z-10 border-border/50 bg-card/45 backdrop-blur-xl shadow-2xl animate-in zoom-in-95 duration-300">
         <CardHeader className="space-y-3 text-center pt-8">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 mb-2">
-            <Rocket className="w-6 h-6 text-primary" />
+            <Briefcase className="w-6 h-6 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold tracking-tight">
-            {mode === 'login' && 'Welcome back'}
+            {mode === 'login' && 'Sign in to ProjectHub'}
             {mode === 'signup' && 'Create an account'}
             {mode === 'forgot-password' && 'Recover Password'}
           </CardTitle>
@@ -195,12 +197,21 @@ export default function AuthPage() {
                     Forgot password?
                   </button>
                 </div>
-                <Input 
-                  placeholder="••••••••" 
-                  type="password" 
-                  {...loginForm.register('password')} 
-                  className="bg-background/50 border-border/50 text-xs h-9" 
-                />
+                <div className="relative">
+                  <Input 
+                    placeholder="••••••••" 
+                    type={showPassword ? "text" : "password"} 
+                    {...loginForm.register('password')} 
+                    className="bg-background/50 border-border/50 text-xs h-9 pr-10" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {loginForm.formState.errors.password && (
                   <p className="text-[10px] font-medium text-destructive">{loginForm.formState.errors.password.message}</p>
                 )}
@@ -245,12 +256,21 @@ export default function AuthPage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Password</label>
-                <Input 
-                  placeholder="••••••••" 
-                  type="password" 
-                  {...signupForm.register('password')} 
-                  className="bg-background/50 border-border/50 text-xs h-9" 
-                />
+                <div className="relative">
+                  <Input 
+                    placeholder="••••••••" 
+                    type={showPassword ? "text" : "password"} 
+                    {...signupForm.register('password')} 
+                    className="bg-background/50 border-border/50 text-xs h-9 pr-10" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {signupForm.formState.errors.password && (
                   <p className="text-[10px] font-medium text-destructive">{signupForm.formState.errors.password.message}</p>
                 )}
