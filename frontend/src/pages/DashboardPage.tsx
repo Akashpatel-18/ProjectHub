@@ -46,7 +46,7 @@ export default function DashboardPage() {
   const totalProjects = projectsData?.length || 0;
 
   // My Tasks (assigned to current user)
-  const myTasks = tasksData?.filter((t: any) => t.assigneeId === user?.id && t.status !== 'DONE') || [];
+  const myTasks = tasksData?.filter((t: any) => t.assigneeId === user?.id) || [];
   const myTasksCount = myTasks.length;
 
   // Tasks Due Today (from accessible tasks)
@@ -74,14 +74,14 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col gap-6 animate-pulse">
         <div className="h-10 w-48 bg-muted rounded-md" />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-card/50 border border-border/50 rounded-xl" />
+            <div key={i} className="h-28 sm:h-32 bg-card/50 border border-border/50 rounded-xl" />
           ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-          <div className="h-[400px] md:col-span-4 bg-card/50 border border-border/50 rounded-xl" />
-          <div className="h-[400px] md:col-span-3 bg-card/50 border border-border/50 rounded-xl" />
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-7">
+          <div className="h-[300px] sm:h-[400px] lg:col-span-4 bg-card/50 border border-border/50 rounded-xl" />
+          <div className="h-[300px] sm:h-[400px] lg:col-span-3 bg-card/50 border border-border/50 rounded-xl" />
         </div>
       </div>
     );
@@ -92,8 +92,8 @@ export default function DashboardPage() {
       {/* Header / Welcome Row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            {getGreeting()}, {user?.name}
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            {getGreeting()}, {user?.name?.split(' ')[0]}
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
             Here's what is happening in your workspace today.
@@ -109,7 +109,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="My Projects"
           value={totalProjects}
@@ -145,9 +145,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Grid: Projects & Activity */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-7">
         {/* Projects Overview */}
-        <Card className="border-border/50 bg-card/30 backdrop-blur-xl md:col-span-4">
+        <Card className="border-border/50 bg-card/30 backdrop-blur-xl lg:col-span-4">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-lg font-bold">Recent Projects</CardTitle>
@@ -200,7 +200,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Activity Stream */}
-        <Card className="border-border/50 bg-card/30 backdrop-blur-xl md:col-span-3">
+        <Card className="border-border/50 bg-card/30 backdrop-blur-xl lg:col-span-3">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />

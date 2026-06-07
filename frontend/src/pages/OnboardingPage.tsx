@@ -116,7 +116,7 @@ export default function OnboardingPage() {
             <Rocket className="w-6 h-6 text-primary" />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-foreground">
+        <h2 className="mt-6 text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
           Welcome, {user?.name?.split(' ')[0]}!
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
@@ -194,7 +194,7 @@ export default function OnboardingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleJoinWorkspace} className="flex gap-3">
+            <form onSubmit={handleJoinWorkspace} className="flex flex-col sm:flex-row gap-3">
               <Input 
                 placeholder="Paste invite link or token..." 
                 className="bg-background/50 flex-1" 

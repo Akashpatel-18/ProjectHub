@@ -94,7 +94,7 @@ export default function KanbanPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-128px)] animate-in fade-in duration-500">
+    <div className="flex flex-col h-[calc(100vh-112px)] sm:h-[calc(100vh-128px)] animate-in fade-in duration-500">
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
         <div className="flex items-center gap-3">
@@ -102,7 +102,7 @@ export default function KanbanPage() {
             <FolderKanban className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">{project.name}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{project.name}</h2>
             <p className="text-muted-foreground text-xs mt-1 leading-none">
               {project.description || 'No description provided.'}
             </p>
@@ -126,7 +126,7 @@ export default function KanbanPage() {
       </div>
 
       {/* ── TAB SWITCHER ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 border-b border-border/40 shrink-0 mb-6">
+      <div className="flex items-center gap-1 border-b border-border/40 shrink-0 mb-4 sm:mb-6 overflow-x-auto">
         <button
           onClick={() => setActiveTab('kanban')}
           className={cn(

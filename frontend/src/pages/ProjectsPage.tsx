@@ -62,7 +62,7 @@ export default function ProjectsPage() {
       {/* Top Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Projects</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Projects</h2>
           <p className="text-muted-foreground text-sm mt-1">
             Manage your initiatives, roadmaps, and timelines.
           </p>
@@ -80,7 +80,7 @@ export default function ProjectsPage() {
 
       {/* Projects Grid */}
       {projects && projects.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project: any) => (
             <Card
               key={project.id}
@@ -116,7 +116,7 @@ export default function ProjectsPage() {
                   <span>{project._count?.tasks || 0} active tasks</span>
                 </div>
               </CardContent>
-              <CardFooter className="border-t border-border/40 pt-4 pb-4 flex justify-between bg-card/10 rounded-b-xl gap-2">
+              <CardFooter className="border-t border-border/40 pt-4 pb-4 flex flex-row justify-between bg-card/10 rounded-b-xl gap-2">
                 {/* Delete — OWNER can delete any; ADMIN can delete only their own */}
                 {(isOwner || (isAdmin && project.createdById === currentUser?.id)) && (
                   <Button

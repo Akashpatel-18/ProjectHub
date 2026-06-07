@@ -27,7 +27,7 @@ export function TaskSidebar({ taskId, slug, task, members, currentUser, canEditT
   const isWatching = task?.watchers?.some((w: any) => w.userId === currentUser?.id);
 
   return (
-    <div className="md:col-span-2 p-6 bg-secondary/15 space-y-6 overflow-y-auto custom-scrollbar">
+    <div className="md:col-span-2 p-4 sm:p-6 bg-secondary/15 space-y-6 md:overflow-y-auto custom-scrollbar border-t md:border-t-0 border-border/30">
       
       {/* Watcher widget */}
       <div className="space-y-3">

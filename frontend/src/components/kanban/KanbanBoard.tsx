@@ -81,7 +81,7 @@ export function KanbanBoard({
   };
 
   return (
-    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto overflow-y-hidden min-h-0 pb-2 custom-scrollbar pr-1">
+    <div className="flex-1 flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto overflow-y-hidden min-h-0 pb-2 custom-scrollbar pr-1 snap-x snap-mandatory lg:snap-none">
       {COLUMNS.map((column) => {
         const colTasks = tasks?.filter((t: any) => t.status === column.id) || [];
         const isOver = draggedOverColumn === column.id;
@@ -93,7 +93,7 @@ export function KanbanBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, column.id)}
             className={cn(
-              'flex flex-col h-full rounded-2xl border bg-card/10 backdrop-blur-xl p-4 transition-all duration-200 min-h-[400px] shadow-md',
+              'flex flex-col h-full rounded-2xl border bg-card/10 backdrop-blur-xl p-4 transition-all duration-200 min-h-[400px] shadow-md w-[280px] sm:w-[300px] lg:w-auto snap-center shrink-0 lg:shrink',
               isOver
                 ? 'border-primary bg-primary/5 ring-1 ring-primary/25 shadow-lg shadow-primary/5'
                 : 'border-border/30'
@@ -169,12 +169,12 @@ export function KanbanBoard({
                         )}
                       </div>
 
-                      <h4 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 mb-1.5">
+                      <h4 className="text-sm font-semibold text-foreground mb-1 leading-tight group-hover:text-primary transition-colors line-clamp-2">
                         {task.title}
                       </h4>
 
                       {task.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+                        <p className="text-xs text-muted-foreground mb-3 leading-relaxed whitespace-pre-wrap line-clamp-2">
                           {task.description}
                         </p>
                       )}

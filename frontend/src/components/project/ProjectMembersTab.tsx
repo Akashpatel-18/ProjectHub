@@ -141,8 +141,8 @@ export function ProjectMembersTab({
   ) ?? [];
 
   return (
-    <div className="flex flex-col h-full bg-card/10 backdrop-blur-xl rounded-2xl border border-border/50 p-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-6 shrink-0">
+    <div className="flex flex-col h-full bg-card/10 backdrop-blur-xl rounded-2xl border border-border/50 p-4 sm:p-6 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 shrink-0 gap-3">
         <div>
           <h3 className="text-lg font-bold text-foreground">Project Members</h3>
           <p className="text-sm text-muted-foreground mt-1">
@@ -150,108 +150,181 @@ export function ProjectMembersTab({
           </p>
         </div>
         {canManageProjectMembers && (
-          <Button onClick={() => setAddMemberOpen(true)} className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25">
+          <Button onClick={() => setAddMemberOpen(true)} className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 w-full sm:w-auto">
             <UserPlus className="w-4 h-4 mr-2" /> Add Member
           </Button>
         )}
       </div>
 
-      <div className="flex-1 overflow-auto rounded-xl border border-border/50 bg-card/30">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border/40 hover:bg-transparent">
-              <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider w-[300px]">Member</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Project Role</TableHead>
-              <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Added</TableHead>
-              {(canManageProjectMembers) && (
-                <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-right w-[80px]">Actions</TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {projectMembers?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-16 text-muted-foreground text-sm">
-                  <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground/30" />
-                  No members added to this project yet.
-                </TableCell>
-              </TableRow>
-            ) : (
-              projectMembers?.map((member: any) => {
-                const isSelf = member.userId === currentUser?.id;
-                // Workspace owners cannot be removed or downgraded in project by anyone, including admins
-                // const isMemberWorkspaceOwner = workspaceMembers?.find((wm: any) => wm.userId === member.userId)?.role?.name === 'Owner';
-                const canModifyThisMember = canManageProjectMembers && !isSelf;
+      {/* ── Mobile Card Layout ──────────────────────────────────────── */}
+      <div className="md:hidden flex-1 overflow-auto space-y-3">
+        {projectMembers?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground text-sm">
+            <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground/30" />
+            No members added to this project yet.
+          </div>
+        ) : (
+          projectMembers?.map((member: any) => {
+            const isSelf = member.userId === currentUser?.id;
+            const canModifyThisMember = canManageProjectMembers && !isSelf;
 
-                return (
-                  <TableRow key={member.id} className="border-border/30 hover:bg-secondary/20 transition-colors duration-150">
-                    <TableCell className="py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-9 h-9 border border-border/50 shrink-0">
-                          <AvatarImage src={member.user?.avatarUrl} />
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                            {member.user?.name?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                            {member.user?.name}
-                            {isSelf && <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0">You</Badge>}
+            return (
+              <div
+                key={member.id}
+                className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-xl p-4 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="w-9 h-9 border border-border/50 shrink-0">
+                      <AvatarImage src={member.user?.avatarUrl} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                        {member.user?.name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="truncate">{member.user?.name}</span>
+                        {isSelf && <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0 shrink-0">You</Badge>}
+                      </div>
+                      <span className="text-xs text-muted-foreground truncate block">{member.user?.email}</span>
+                    </div>
+                  </div>
+
+                  {canModifyThisMember && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="border-border/50 bg-card/95 backdrop-blur-xl w-44">
+                        <DropdownMenuItem className="text-xs font-semibold cursor-pointer flex items-center gap-2" onClick={() => {
+                          setChangeRoleTarget({ userId: member.userId, name: member.user?.name, currentRoleId: member.roleId });
+                          changeRoleForm.setValue('roleId', member.roleId);
+                        }}>
+                          <UserCog className="w-3.5 h-3.5" /> Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-border/50" />
+                        <DropdownMenuItem className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2" onClick={() => handleRemove(member.userId, member.user?.name)}>
+                          <Trash2 className="w-3.5 h-3.5" /> Remove from Project
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-border/30">
+                  <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}>
+                    {getRoleIcon(member.role?.name)}
+                    {member.role?.name}
+                  </Badge>
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    Added {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop Table Layout ────────────────────────────────────── */}
+      <div className="hidden md:block flex-1 overflow-auto rounded-xl border border-border/50 bg-card/30">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border/40 hover:bg-transparent">
+                <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider w-[300px]">Member</TableHead>
+                <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email</TableHead>
+                <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Project Role</TableHead>
+                <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Added</TableHead>
+                {(canManageProjectMembers) && (
+                  <TableHead className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-right w-[80px]">Actions</TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projectMembers?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-16 text-muted-foreground text-sm">
+                    <Users className="w-8 h-8 mx-auto mb-3 text-muted-foreground/30" />
+                    No members added to this project yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                projectMembers?.map((member: any) => {
+                  const isSelf = member.userId === currentUser?.id;
+                  const canModifyThisMember = canManageProjectMembers && !isSelf;
+
+                  return (
+                    <TableRow key={member.id} className="border-border/30 hover:bg-secondary/20 transition-colors duration-150">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-9 h-9 border border-border/50 shrink-0">
+                            <AvatarImage src={member.user?.avatarUrl} />
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                              {member.user?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                              {member.user?.name}
+                              {isSelf && <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0">You</Badge>}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 shrink-0" />
-                        {member.user?.email}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}>
-                        {getRoleIcon(member.role?.name)}
-                        {member.role?.name}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-4">
-                      <span className="text-xs text-muted-foreground font-medium">
-                        {format(new Date(member.createdAt), 'MMM d, yyyy')}
-                      </span>
-                    </TableCell>
-                    {(canManageProjectMembers) && (
-                      <TableCell className="py-4 text-right">
-                        {canModifyThisMember ? (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="border-border/50 bg-card/95 backdrop-blur-xl w-44">
-                              <DropdownMenuItem className="text-xs font-semibold cursor-pointer flex items-center gap-2" onClick={() => {
-                                setChangeRoleTarget({ userId: member.userId, name: member.user?.name, currentRoleId: member.roleId });
-                                changeRoleForm.setValue('roleId', member.roleId);
-                              }}>
-                                <UserCog className="w-3.5 h-3.5" /> Change Role
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-border/50" />
-                              <DropdownMenuItem className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2" onClick={() => handleRemove(member.userId, member.user?.name)}>
-                                <Trash2 className="w-3.5 h-3.5" /> Remove from Project
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ) : (
-                          <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
-                        )}
                       </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                      <TableCell className="py-4">
+                        <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 shrink-0" />
+                          {member.user?.email}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}>
+                          {getRoleIcon(member.role?.name)}
+                          {member.role?.name}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                        </span>
+                      </TableCell>
+                      {(canManageProjectMembers) && (
+                        <TableCell className="py-4 text-right">
+                          {canModifyThisMember ? (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="border-border/50 bg-card/95 backdrop-blur-xl w-44">
+                                <DropdownMenuItem className="text-xs font-semibold cursor-pointer flex items-center gap-2" onClick={() => {
+                                  setChangeRoleTarget({ userId: member.userId, name: member.user?.name, currentRoleId: member.roleId });
+                                  changeRoleForm.setValue('roleId', member.roleId);
+                                }}>
+                                  <UserCog className="w-3.5 h-3.5" /> Change Role
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-border/50" />
+                                <DropdownMenuItem className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2" onClick={() => handleRemove(member.userId, member.user?.name)}>
+                                  <Trash2 className="w-3.5 h-3.5" /> Remove from Project
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Add Member Modal */}

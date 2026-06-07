@@ -31,6 +31,7 @@ export default function TaskDetailsModal({ taskId, onClose }: TaskDetailsModalPr
 
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editDescription, setEditDescription] = useState('');
   const [isEditingDesc, setIsEditingDesc] = useState(false);
 
@@ -168,6 +169,7 @@ export default function TaskDetailsModal({ taskId, onClose }: TaskDetailsModalPr
   const updateTaskMutation = useUpdateTaskMutation(slug);
 
   const handleTitleBlur = () => {
+    setIsEditingTitle(false);
     if (editTitle.trim() && editTitle.trim() !== task?.title) {
       updateTaskMutation.mutate({ taskId: taskId!, data: { title: editTitle.trim() } });
     } else {
@@ -196,7 +198,7 @@ export default function TaskDetailsModal({ taskId, onClose }: TaskDetailsModalPr
 
   return (
     <Dialog open={!!taskId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl h-[90vh] md:h-[85vh] overflow-y-auto border-border/50 bg-card/95 backdrop-blur-xl flex flex-col p-0">
+      <DialogContent className="w-full h-[100dvh] sm:w-[calc(100%-2rem)] max-w-4xl sm:h-[90vh] md:h-[85vh] overflow-hidden rounded-none sm:rounded-lg border-0 sm:border border-border/50 bg-card/95 backdrop-blur-xl flex flex-col p-0">
 
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -246,18 +248,33 @@ export default function TaskDetailsModal({ taskId, onClose }: TaskDetailsModalPr
                   </SelectContent>
                 </Select>
               </div>
-              <DialogTitle className="text-xl font-bold text-foreground pr-8">
+              <DialogTitle className="text-xl font-bold text-foreground pr-8 break-words whitespace-pre-wrap">
                 {canEditTasks ? (
-                  <input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={handleTitleBlur}
-                    onKeyDown={handleTitleKeyDown}
-                    className="w-full bg-transparent border-b border-transparent hover:border-border/50 focus:border-primary focus:outline-none transition-colors"
-                    placeholder="Task Title"
-                  />
+                  isEditingTitle ? (
+                    <textarea
+                      autoFocus
+                      value={editTitle}
+                      onChange={(e) => {
+                        e.target.style.height = 'inherit';
+                        e.target.style.height = `${e.target.scrollHeight}px`;
+                        setEditTitle(e.target.value);
+                      }}
+                      onBlur={handleTitleBlur}
+                      onKeyDown={handleTitleKeyDown}
+                      className="w-full bg-transparent border-b border-primary focus:outline-none resize-none overflow-hidden"
+                      placeholder="Task Title"
+                      rows={1}
+                    />
+                  ) : (
+                    <div 
+                      onClick={() => setIsEditingTitle(true)}
+                      className="cursor-pointer hover:bg-secondary/40 rounded px-1 -ml-1 transition-colors min-h-[32px]"
+                    >
+                      {task?.title}
+                    </div>
+                  )
                 ) : (
-                  task?.title
+                  <div className="px-1 -ml-1 min-h-[32px]">{task?.title}</div>
                 )}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5">
@@ -265,9 +282,9 @@ export default function TaskDetailsModal({ taskId, onClose }: TaskDetailsModalPr
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex-1 grid md:grid-cols-5 overflow-hidden">
+            <div className="flex-1 flex flex-col md:grid md:grid-cols-5 overflow-y-auto md:overflow-hidden">
               {/* Main Column */}
-              <div className="md:col-span-3 p-6 space-y-6 overflow-y-auto custom-scrollbar border-r border-border/30">
+              <div className="md:col-span-3 p-4 sm:p-6 space-y-6 md:overflow-y-auto custom-scrollbar md:border-r border-border/30">
                 {/* Description */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Description</h4>

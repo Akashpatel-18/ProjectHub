@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { Bell, Sun, Moon, MessageSquare, ClipboardList, Check, Clock, Inbox } from 'lucide-react';
+import { Bell, Sun, Moon, MessageSquare, ClipboardList, Check, Clock, Inbox, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,7 @@ const DashboardLayout = () => {
   const { theme, setTheme } = useTheme();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Queries
   const {
@@ -100,14 +101,23 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden text-foreground">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full min-w-0">
         {/* Topbar */}
-        <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-8 top-0 z-10">
-          <div className="flex items-center gap-4">
-            <h1 className="font-semibold text-lg tracking-tight capitalize text-foreground">
+        <header className="h-14 sm:h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 lg:px-8 top-0 z-10">
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger menu */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+            <h1 className="font-semibold text-base sm:text-lg tracking-tight capitalize text-foreground truncate">
               {slug?.replace('-', ' ')}
             </h1>
           </div>
@@ -206,7 +216,7 @@ const DashboardLayout = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto bg-background p-8">
+        <main className="flex-1 overflow-auto bg-background p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

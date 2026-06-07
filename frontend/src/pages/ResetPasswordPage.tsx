@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 relative overflow-hidden text-foreground">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
         <Card className="w-full max-w-md relative z-10 border-destructive/20 bg-card/45 backdrop-blur-xl shadow-2xl">
           <CardHeader className="space-y-3 text-center pt-8">
             <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center border border-destructive/20 mb-2">
@@ -110,8 +110,8 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4 relative overflow-hidden text-foreground">
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
 
       <Card className="w-full max-w-md relative z-10 border-border/50 bg-card/45 backdrop-blur-xl shadow-2xl animate-in zoom-in-95 duration-300">
         <CardHeader className="space-y-3 text-center pt-8">

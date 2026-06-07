@@ -123,7 +123,7 @@ export default function WorkspaceSettingsPage() {
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Top Banner */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
           <Settings className="w-8 h-8 text-primary" /> Workspace Settings
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
@@ -131,7 +131,7 @@ export default function WorkspaceSettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Invitation Panel */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="border-border/50 bg-card/30 backdrop-blur-xl">
@@ -230,7 +230,7 @@ export default function WorkspaceSettingsPage() {
                   return (
                     <div 
                       key={member.id} 
-                      className="flex items-center justify-between p-3.5 rounded-xl border border-border/30 bg-card/25 hover:border-border transition-colors duration-200"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-border/30 bg-card/25 hover:border-border transition-colors duration-200 gap-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="w-10 h-10 border border-border">

@@ -8,7 +8,8 @@ import {
   ChevronDown,
   Plus,
   Building,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -55,7 +56,12 @@ const workspaceSchema = z.object({
 
 type WorkspaceFormValues = z.infer<typeof workspaceSchema>;
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -82,6 +88,16 @@ export function Sidebar() {
       form.setValue('slug', generatedSlug, { shouldValidate: true });
     }
   }, [workspaceName, form]);
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => document.body.classList.remove('overflow-hidden');
+  }, [isOpen]);
 
   // Fetch workspaces
   const { data: workspaces, isLoading: loadingWorkspaces } = useQuery({
@@ -126,12 +142,17 @@ export function Sidebar() {
     navigate('/auth');
   };
 
+  const handleNavClick = () => {
+    // Close sidebar on mobile when a nav link is clicked
+    if (onClose) onClose();
+  };
+
   const currentWorkspace = workspaces?.find((w: any) => w.slug === slug);
 
-  return (
-    <aside className="w-64 border-r border-border bg-card flex flex-col h-full text-card-foreground">
+  const sidebarContent = (
+    <>
       {/* Workspace Switcher */}
-      <div className="h-16 flex items-center px-4 border-b border-border">
+      <div className="h-16 flex items-center px-4 border-b border-border shrink-0">
         {loadingWorkspaces ? (
           <div className="flex items-center gap-3 px-2">
             <Loader2 className="w-4 h-4 text-primary animate-spin" />
@@ -168,7 +189,7 @@ export function Sidebar() {
                   <DropdownMenuItem
                     key={w.id}
                     className="flex items-center justify-between font-medium cursor-pointer"
-                    onClick={() => navigate(`/w/${w.slug}`)}
+                    onClick={() => { navigate(`/w/${w.slug}`); handleNavClick(); }}
                   >
                     <span className="truncate">{w.name}</span>
                     {w.slug === slug && (
@@ -264,6 +285,7 @@ export function Sidebar() {
               key={item.path}
               to={to}
               end={item.path === ''}
+              onClick={handleNavClick}
               className={({ isActive }) =>
                 cn(
                   'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
@@ -281,7 +303,7 @@ export function Sidebar() {
       </div>
 
       {/* User Footer */}
-      <div className="p-4 border-t border-border bg-secondary/30">
+      <div className="p-4 border-t border-border bg-secondary/30 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger className="w-full outline-none">
             <div className="flex items-center gap-3 p-2 hover:bg-secondary/50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-border/50">
@@ -310,7 +332,42 @@ export function Sidebar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar — static, always visible on lg+ */}
+      <aside className="hidden lg:flex w-64 border-r border-border bg-card flex-col h-full text-card-foreground shrink-0">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile/Tablet Sidebar — overlay with backdrop */}
+      {/* Backdrop */}
+      <div
+        className={cn(
+          "lg:hidden fixed inset-0 z-40 bg-black/60 sidebar-overlay",
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      {/* Sidebar Panel */}
+      <aside
+        className={cn(
+          "lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-card flex flex-col h-full text-card-foreground shadow-2xl sidebar-panel",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* Mobile close button */}
+        <button
+          className="absolute top-4 right-4 z-10 p-1.5 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+          onClick={onClose}
+        >
+          <X className="w-5 h-5" />
+        </button>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
-
