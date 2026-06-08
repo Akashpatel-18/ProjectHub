@@ -1,4 +1,3 @@
-import React from 'react';
 import { format } from 'date-fns';
 import { Mail, MoreHorizontal, UserCog, Trash2, Shield, Crown, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -64,126 +63,126 @@ export function TeamMemberTable({ members, invites = [], currentUser, isOwner, o
         </div>
       ) : (
         <>
-        {members.map((member: any) => {
-          const isSelf = member.userId === currentUser?.id;
-          const isMemberOwner = member.role?.name === 'Owner';
+          {members.map((member: any) => {
+            const isSelf = member.userId === currentUser?.id;
+            const isMemberOwner = member.role?.name === 'Owner';
 
-          return (
+            return (
+              <div
+                key={member.id}
+                className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-xl p-4 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="w-9 h-9 border border-border/50 shrink-0">
+                      <AvatarImage src={member.user?.avatarUrl} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                        {member.user?.name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <span className="truncate">{member.user?.name}</span>
+                        {isSelf && (
+                          <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0 shrink-0">
+                            You
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground truncate block">{member.user?.email}</span>
+                    </div>
+                  </div>
+
+                  {isOwner && !isSelf && !isMemberOwner && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="border-border/50 bg-card/95 backdrop-blur-xl w-44"
+                      >
+                        <DropdownMenuItem
+                          className="text-xs font-semibold cursor-pointer flex items-center gap-2"
+                          onClick={() => onChangeRole(member.userId, member.user?.name, member.roleId)}
+                        >
+                          <UserCog className="w-3.5 h-3.5" />
+                          Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-border/50" />
+                        <DropdownMenuItem
+                          className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2"
+                          onClick={() => onRemove(member.userId, member.user?.name)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Remove Member
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-border/30">
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}
+                  >
+                    {getRoleIcon(member.role?.name)}
+                    {member.role?.name}
+                  </Badge>
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    Joined {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          {invites.map((invite: any) => (
             <div
-              key={member.id}
-              className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-xl p-4 space-y-3"
+              key={invite.id}
+              className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-xl p-4 space-y-3 opacity-80"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar className="w-9 h-9 border border-border/50 shrink-0">
-                    <AvatarImage src={member.user?.avatarUrl} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                      {member.user?.name?.charAt(0) || 'U'}
+                    <AvatarFallback className="bg-secondary text-muted-foreground text-xs font-bold">
+                      <Mail className="w-4 h-4" />
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                      <span className="truncate">{member.user?.name}</span>
-                      {isSelf && (
-                        <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0 shrink-0">
-                          You
-                        </Badge>
-                      )}
+                      <span className="truncate">{invite.email}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground truncate block">{member.user?.email}</span>
+                    <span className="text-xs text-muted-foreground truncate block">Invited by {invite.invitedBy?.name}</span>
                   </div>
                 </div>
-
-                {isOwner && !isSelf && !isMemberOwner && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground shrink-0"
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="border-border/50 bg-card/95 backdrop-blur-xl w-44"
-                    >
-                      <DropdownMenuItem
-                        className="text-xs font-semibold cursor-pointer flex items-center gap-2"
-                        onClick={() => onChangeRole(member.userId, member.user?.name, member.roleId)}
-                      >
-                        <UserCog className="w-3.5 h-3.5" />
-                        Change Role
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-border/50" />
-                      <DropdownMenuItem
-                        className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2"
-                        onClick={() => onRemove(member.userId, member.user?.name)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Remove Member
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
               </div>
 
               <div className="flex items-center justify-between pt-1 border-t border-border/30">
-                <Badge
-                  variant="outline"
-                  className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}
-                >
-                  {getRoleIcon(member.role?.name)}
-                  {member.role?.name}
-                </Badge>
+                <div className="flex gap-2">
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(invite.role?.name)}`}
+                  >
+                    {getRoleIcon(invite.role?.name)}
+                    {invite.role?.name}
+                  </Badge>
+                  <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold">
+                    PENDING
+                  </Badge>
+                </div>
                 <span className="text-[10px] text-muted-foreground font-medium">
-                  Joined {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                  Sent {format(new Date(invite.createdAt), 'MMM d')}
                 </span>
               </div>
             </div>
-          );
-        })}
-        {invites.map((invite: any) => (
-          <div
-            key={invite.id}
-            className="rounded-xl border border-border/50 bg-card/30 backdrop-blur-xl p-4 space-y-3 opacity-80"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                <Avatar className="w-9 h-9 border border-border/50 shrink-0">
-                  <AvatarFallback className="bg-secondary text-muted-foreground text-xs font-bold">
-                    <Mail className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <span className="truncate">{invite.email}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground truncate block">Invited by {invite.invitedBy?.name}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1 border-t border-border/30">
-              <div className="flex gap-2">
-                <Badge
-                  variant="outline"
-                  className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(invite.role?.name)}`}
-                >
-                  {getRoleIcon(invite.role?.name)}
-                  {invite.role?.name}
-                </Badge>
-                <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold">
-                  PENDING
-                </Badge>
-              </div>
-              <span className="text-[10px] text-muted-foreground font-medium">
-                Sent {format(new Date(invite.createdAt), 'MMM d')}
-              </span>
-            </div>
-          </div>
-        ))}
+          ))}
         </>
       )}
     </div>
@@ -225,159 +224,159 @@ export function TeamMemberTable({ members, invites = [], currentUser, isOwner, o
               </TableRow>
             ) : (
               <>
-              {members.map((member: any) => {
-                const isSelf = member.userId === currentUser?.id;
-                const isMemberOwner = member.role?.name === 'Owner';
+                {members.map((member: any) => {
+                  const isSelf = member.userId === currentUser?.id;
+                  const isMemberOwner = member.role?.name === 'Owner';
 
-                return (
+                  return (
+                    <TableRow
+                      key={member.id}
+                      className="border-border/30 hover:bg-secondary/20 transition-colors duration-150"
+                    >
+                      {/* Avatar + Name */}
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-9 h-9 border border-border/50 shrink-0">
+                            <AvatarImage src={member.user?.avatarUrl} />
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                              {member.user?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                              {member.user?.name}
+                              {isSelf && (
+                                <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0">
+                                  You
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      {/* Email */}
+                      <TableCell className="py-4">
+                        <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 shrink-0" />
+                          {member.user?.email}
+                        </span>
+                      </TableCell>
+
+                      {/* Role */}
+                      <TableCell className="py-4">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}
+                        >
+                          {getRoleIcon(member.role?.name)}
+                          {member.role?.name}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Joined At */}
+                      <TableCell className="py-4">
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                        </span>
+                      </TableCell>
+
+                      {/* Actions */}
+                      {isOwner && (
+                        <TableCell className="py-4 text-right">
+                          {!isSelf && !isMemberOwner ? (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="border-border/50 bg-card/95 backdrop-blur-xl w-44"
+                              >
+                                <DropdownMenuItem
+                                  className="text-xs font-semibold cursor-pointer flex items-center gap-2"
+                                  onClick={() => onChangeRole(member.userId, member.user?.name, member.roleId)}
+                                >
+                                  <UserCog className="w-3.5 h-3.5" />
+                                  Change Role
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-border/50" />
+                                <DropdownMenuItem
+                                  className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2"
+                                  onClick={() => onRemove(member.userId, member.user?.name)}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Remove Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ) : (
+                            <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
+                          )}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+                {invites.map((invite: any) => (
                   <TableRow
-                    key={member.id}
-                    className="border-border/30 hover:bg-secondary/20 transition-colors duration-150"
+                    key={invite.id}
+                    className="border-border/30 hover:bg-secondary/20 transition-colors duration-150 opacity-80"
                   >
-                    {/* Avatar + Name */}
                     <TableCell className="py-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-9 h-9 border border-border/50 shrink-0">
-                          <AvatarImage src={member.user?.avatarUrl} />
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                            {member.user?.name?.charAt(0) || 'U'}
+                          <AvatarFallback className="bg-secondary text-muted-foreground text-xs font-bold">
+                            <Mail className="w-4 h-4" />
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                            {member.user?.name}
-                            {isSelf && (
-                              <Badge variant="outline" className="text-[9px] bg-secondary border-border font-bold px-1.5 py-0">
-                                You
-                              </Badge>
-                            )}
+                            <span className="text-muted-foreground italic">Pending Invite</span>
+                            <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold px-1.5 py-0">
+                              PENDING
+                            </Badge>
                           </div>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* Email */}
                     <TableCell className="py-4">
                       <span className="text-sm text-muted-foreground flex items-center gap-1.5">
                         <Mail className="w-3.5 h-3.5 shrink-0" />
-                        {member.user?.email}
+                        {invite.email}
                       </span>
                     </TableCell>
 
-                    {/* Role */}
                     <TableCell className="py-4">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(member.role?.name)}`}
+                        className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(invite.role?.name)}`}
                       >
-                        {getRoleIcon(member.role?.name)}
-                        {member.role?.name}
+                        {getRoleIcon(invite.role?.name)}
+                        {invite.role?.name}
                       </Badge>
                     </TableCell>
 
-                    {/* Joined At */}
                     <TableCell className="py-4">
                       <span className="text-xs text-muted-foreground font-medium">
-                        {format(new Date(member.createdAt), 'MMM d, yyyy')}
+                        Sent {format(new Date(invite.createdAt), 'MMM d, yyyy')}
                       </span>
                     </TableCell>
 
-                    {/* Actions */}
                     {isOwner && (
                       <TableCell className="py-4 text-right">
-                        {!isSelf && !isMemberOwner ? (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="w-8 h-8 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                              >
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="border-border/50 bg-card/95 backdrop-blur-xl w-44"
-                            >
-                              <DropdownMenuItem
-                                className="text-xs font-semibold cursor-pointer flex items-center gap-2"
-                                onClick={() => onChangeRole(member.userId, member.user?.name, member.roleId)}
-                              >
-                                <UserCog className="w-3.5 h-3.5" />
-                                Change Role
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-border/50" />
-                              <DropdownMenuItem
-                                className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer flex items-center gap-2"
-                                onClick={() => onRemove(member.userId, member.user?.name)}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Remove Member
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ) : (
-                          <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
-                        )}
+                        <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
                       </TableCell>
                     )}
                   </TableRow>
-                );
-              })}
-              {invites.map((invite: any) => (
-                <TableRow
-                  key={invite.id}
-                  className="border-border/30 hover:bg-secondary/20 transition-colors duration-150 opacity-80"
-                >
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-9 h-9 border border-border/50 shrink-0">
-                        <AvatarFallback className="bg-secondary text-muted-foreground text-xs font-bold">
-                          <Mail className="w-4 h-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          <span className="text-muted-foreground italic">Pending Invite</span>
-                          <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold px-1.5 py-0">
-                            PENDING
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="py-4">
-                    <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
-                      {invite.email}
-                    </span>
-                  </TableCell>
-
-                  <TableCell className="py-4">
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 w-fit ${getRoleBadgeStyle(invite.role?.name)}`}
-                    >
-                      {getRoleIcon(invite.role?.name)}
-                      {invite.role?.name}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="py-4">
-                    <span className="text-xs text-muted-foreground font-medium">
-                      Sent {format(new Date(invite.createdAt), 'MMM d, yyyy')}
-                    </span>
-                  </TableCell>
-
-                  {isOwner && (
-                    <TableCell className="py-4 text-right">
-                      <span className="text-xs text-muted-foreground/40 font-medium pr-2">—</span>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
+                ))}
               </>
             )}
           </TableBody>

@@ -1,14 +1,11 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { 
-  Users, 
-  UserPlus, 
-  ShieldAlert, 
-  Trash2, 
-  Shield, 
-  Mail, 
-  Clock,
+import {
+  Users,
+  UserPlus,
+  ShieldAlert,
+  Trash2,
+  Shield,
+  Mail,
   Loader2,
   Settings
 } from 'lucide-react';
@@ -16,16 +13,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-import { useToast } from '../hooks/use-toast';
 import { useAuthStore } from '../store/auth.store';
-import { 
-  useWorkspaceMembersQuery, 
-  useWorkspaceRolesQuery, 
-  useInviteWorkspaceMemberMutation, 
-  useRemoveWorkspaceMemberMutation, 
+import {
+  useWorkspaceMembersQuery,
+  useInviteWorkspaceMemberMutation,
+  useRemoveWorkspaceMemberMutation,
   useUpdateWorkspaceRoleMutation,
   usePendingInvitesQuery
 } from '@/services/member/member.queries';
+import { useWorkspaceRolesQuery } from '@/services/workspace/workspace.queries'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -58,9 +54,7 @@ type InviteFormValues = z.infer<typeof inviteSchema>;
 
 export default function WorkspaceSettingsPage() {
   const { slug } = useParams();
-  const { toast } = useToast();
   const { user: currentUser } = useAuthStore();
-  const queryClient = useQueryClient();
 
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
@@ -72,7 +66,7 @@ export default function WorkspaceSettingsPage() {
 
   // Queries
   const { data: members, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug!);
-  const { data: invites, isLoading: loadingInvites } = usePendingInvitesQuery(slug!);
+  const { data: invites } = usePendingInvitesQuery(slug!);
   const { data: roles, isLoading: loadingRoles } = useWorkspaceRolesQuery(slug);
 
   // Mutations
@@ -198,8 +192,8 @@ export default function WorkspaceSettingsPage() {
                       )}
                     />
 
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 pt-2 pb-2"
                       disabled={inviteMutation.isPending}
                     >
@@ -236,8 +230,8 @@ export default function WorkspaceSettingsPage() {
                   const isOwner = member.role?.name === 'Owner';
 
                   return (
-                    <div 
-                      key={member.id} 
+                    <div
+                      key={member.id}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-border/30 bg-card/25 hover:border-border transition-colors duration-200 gap-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -261,8 +255,8 @@ export default function WorkspaceSettingsPage() {
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-[10px] font-semibold uppercase tracking-wider border ${getRoleBadgeStyle(member.role?.name)}`}
                         >
                           {member.role?.name}
@@ -279,11 +273,11 @@ export default function WorkspaceSettingsPage() {
                             <DropdownMenuContent className="border-border/50 bg-card/95 backdrop-blur-xl">
                               <DropdownMenuLabel>Permissions</DropdownMenuLabel>
                               <DropdownMenuSeparator className="bg-border/50" />
-                              
+
                               {roles && roles.map((role: any) => {
                                 if (role.name === 'Owner') return null; // Cannot elevate to owner directly this way
                                 return (
-                                  <DropdownMenuItem 
+                                  <DropdownMenuItem
                                     key={role.id}
                                     className="text-xs font-semibold cursor-pointer"
                                     onClick={() => handleRoleChange(member.userId, role.id)}
@@ -293,9 +287,9 @@ export default function WorkspaceSettingsPage() {
                                   </DropdownMenuItem>
                                 );
                               })}
-                              
+
                               <DropdownMenuSeparator className="bg-border/50" />
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-xs font-semibold text-red-500 hover:text-red-400 focus:text-red-400 focus:bg-destructive/10 cursor-pointer"
                                 onClick={() => handleRemoveMember(member.userId)}
                               >
@@ -308,10 +302,10 @@ export default function WorkspaceSettingsPage() {
                     </div>
                   );
                 })}
-                
+
                 {invites && invites.map((invite: any) => (
-                  <div 
-                    key={invite.id} 
+                  <div
+                    key={invite.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-border/30 bg-card/10 hover:border-border transition-colors duration-200 gap-3 opacity-80"
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -332,8 +326,8 @@ export default function WorkspaceSettingsPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`text-[10px] font-semibold uppercase tracking-wider border ${getRoleBadgeStyle(invite.role?.name)}`}
                       >
                         {invite.role?.name}

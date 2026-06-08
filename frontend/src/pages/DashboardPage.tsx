@@ -1,10 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import {
   FolderKanban,
   CheckCircle2,
   ListTodo,
-  Users,
   TrendingUp,
   Activity,
   Clock,
@@ -29,7 +27,7 @@ export default function DashboardPage() {
   // Queries
   const { data: projectsData, isLoading: loadingProjects } = useProjectsQuery(slug);
   const { data: tasksData, isLoading: loadingTasks } = useTasksQuery(slug);
-  const { data: membersData, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug);
+  const { isLoading: loadingMembers } = useWorkspaceMembersQuery(slug);
   const {
     data: activityPages,
     isLoading: loadingActivity,

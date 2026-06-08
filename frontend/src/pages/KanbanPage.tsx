@@ -54,7 +54,7 @@ export default function KanbanPage() {
   const projectRoles = roles?.filter((r: any) => ['Admin', 'Member', 'Guest'].includes(r.name)) ?? [];
 
   // ── Mutations ──────────────────────────────────────────────────────────────
-  const updateTaskMutation = useUpdateTaskMutation(slug!, projectId!);
+  const updateTaskMutation = useUpdateTaskMutation(slug!);
   const deleteTaskMutation = useDeleteTaskMutation(slug!, projectId!);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -195,12 +195,12 @@ export default function KanbanPage() {
         />
       )}
 
-      <TaskDetailsModal
-        slug={slug!}
-        projectId={projectId!}
-        taskId={selectedTaskId}
-        onClose={() => setSelectedTaskId(null)}
-      />
+      {selectedTaskId && (
+        <TaskDetailsModal
+          taskId={selectedTaskId}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </div>
   );
 }

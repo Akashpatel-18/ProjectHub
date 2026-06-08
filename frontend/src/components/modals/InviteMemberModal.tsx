@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -111,7 +110,7 @@ export function InviteMemberModal({ slug, open, onOpenChange, isOwner, invitable
                 <p className="text-[10px] font-medium text-destructive">{inviteForm.formState.errors.roleId.message}</p>
               )}
             </div>
-            
+
             <DialogFooter className="pt-2">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={inviteMutation.isPending}>
                 Cancel

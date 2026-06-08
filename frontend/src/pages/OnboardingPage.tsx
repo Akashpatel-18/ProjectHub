@@ -34,7 +34,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   const [joinToken, setJoinToken] = useState('');
 

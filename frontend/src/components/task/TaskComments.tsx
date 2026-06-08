@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,6 +19,7 @@ interface TaskCommentsProps {
   comments: any[];
   currentUser: any;
   typingUser: string | null;
+  canEditTasks?: boolean;
 }
 
 export function TaskComments({ taskId, slug, comments, currentUser, typingUser }: TaskCommentsProps) {
@@ -42,7 +43,7 @@ export function TaskComments({ taskId, slug, comments, currentUser, typingUser }
 
   const handleTypingKeyPress = () => {
     if (!currentUser || !slug || !taskId) return;
-    
+
     socket.emit('user:typing', {
       workspaceSlug: slug,
       taskId,
@@ -62,13 +63,13 @@ export function TaskComments({ taskId, slug, comments, currentUser, typingUser }
         <MessageSquare className="w-4 h-4 text-primary" /> Comments
       </h4>
 
-      <form 
+      <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-2"
       >
-        <textarea 
-          placeholder="Write a comment..." 
-          {...form.register('content')} 
+        <textarea
+          placeholder="Write a comment..."
+          {...form.register('content')}
           onKeyPress={handleTypingKeyPress}
           className="w-full min-h-[70px] rounded-lg border border-border/50 bg-background/50 p-3 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 placeholder:text-muted-foreground leading-relaxed resize-none"
         />
@@ -76,9 +77,9 @@ export function TaskComments({ taskId, slug, comments, currentUser, typingUser }
           <div className="text-[10px] text-muted-foreground italic h-4">
             {typingUser && `${typingUser} is typing...`}
           </div>
-          <Button 
-            type="submit" 
-            size="sm" 
+          <Button
+            type="submit"
+            size="sm"
             className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-4"
             disabled={commentMutation.isPending}
           >

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -52,14 +51,14 @@ export function TaskSubtasks({ taskId, slug, subtasks, canEditTasks = true }: Ta
 
       <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
         {subtasks.map((sub: any) => (
-          <div 
-            key={sub.id} 
+          <div
+            key={sub.id}
             className="flex items-center justify-between p-2 rounded-lg border border-border/20 bg-card/10 hover:bg-card/30 transition-all duration-200"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <input 
-                type="checkbox" 
-                checked={sub.isCompleted} 
+              <input
+                type="checkbox"
+                checked={sub.isCompleted}
                 disabled={!canEditTasks}
                 onChange={(e) => toggleSubtaskMutation.mutate({ subtaskId: sub.id, isCompleted: e.target.checked })}
                 className="rounded border-border bg-background text-primary focus:ring-0 cursor-pointer w-4 h-4 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -69,9 +68,9 @@ export function TaskSubtasks({ taskId, slug, subtasks, canEditTasks = true }: Ta
               </span>
             </div>
             {canEditTasks && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md shrink-0"
                 onClick={() => deleteSubtaskMutation.mutate(sub.id)}
               >
@@ -83,13 +82,13 @@ export function TaskSubtasks({ taskId, slug, subtasks, canEditTasks = true }: Ta
       </div>
 
       {canEditTasks && (
-        <form 
+        <form
           onSubmit={form.handleSubmit((v) => { subtaskMutation.mutate(v); form.reset(); })}
           className="flex gap-2"
         >
-          <Input 
-            placeholder="Add subtask..." 
-            {...form.register('title')} 
+          <Input
+            placeholder="Add subtask..."
+            {...form.register('title')}
             className="h-8 text-xs bg-background/50 border-border/50"
             disabled={subtaskMutation.isPending}
           />

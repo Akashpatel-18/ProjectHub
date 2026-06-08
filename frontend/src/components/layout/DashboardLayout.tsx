@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useParams, Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { Outlet, useParams } from 'react-router-dom';
+import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { Bell, Sun, Moon, MessageSquare, ClipboardList, Check, Clock, Inbox, Menu } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,7 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';

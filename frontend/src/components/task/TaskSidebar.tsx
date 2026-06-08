@@ -1,8 +1,6 @@
-import React from 'react';
 import { EyeOff, Eye, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -28,13 +26,13 @@ export function TaskSidebar({ taskId, slug, task, members, currentUser, canEditT
 
   return (
     <div className="md:col-span-2 p-4 sm:p-6 bg-secondary/15 space-y-6 md:overflow-y-auto custom-scrollbar border-t md:border-t-0 border-border/30">
-      
+
       {/* Watcher widget */}
       <div className="space-y-3">
         <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Subscribers</h4>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => watchMutation.mutate()}
           className="w-full bg-card/50 border-border/50 hover:bg-secondary hover:text-foreground font-semibold text-xs h-9 justify-start"
           disabled={watchMutation.isPending}
@@ -123,16 +121,14 @@ export function TaskSidebar({ taskId, slug, task, members, currentUser, canEditT
               mode="single"
               selected={task.dueDate ? new Date(task.dueDate) : undefined}
               onSelect={(date) => updateTaskMutation.mutate({ taskId, data: { dueDate: date ? date.toISOString() : null } })}
-              initialFocus
             />
           </PopoverContent>
         </Popover>
         {task.dueDate && (
-          <Badge variant="outline" className={`text-[10px] font-semibold border ${
-            new Date(task.dueDate) < new Date() && task.status !== 'DONE'
-              ? 'bg-red-500/10 text-red-400 border-red-500/20'
-              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-          }`}>
+          <Badge variant="outline" className={`text-[10px] font-semibold border ${new Date(task.dueDate) < new Date() && task.status !== 'DONE'
+            ? 'bg-red-500/10 text-red-400 border-red-500/20'
+            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+            }`}>
             {new Date(task.dueDate) < new Date() && task.status !== 'DONE' ? 'Overdue' : 'Due'} • {new Date(task.dueDate).toLocaleDateString()}
           </Badge>
         )}

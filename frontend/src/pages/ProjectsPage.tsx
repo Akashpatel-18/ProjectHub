@@ -28,12 +28,6 @@ export default function ProjectsPage() {
   const { data: projects, isLoading } = useProjectsQuery(slug!);
   const deleteMutation = useDeleteProjectMutation(slug!);
 
-  const handleDelete = (projectId: string) => {
-    if (confirm('Are you sure you want to delete this project? This will remove all tasks as well.')) {
-      deleteMutation.mutate(projectId);
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':

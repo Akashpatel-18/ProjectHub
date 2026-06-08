@@ -1,8 +1,6 @@
-import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Plus } from 'lucide-react';
 import { useCreateTaskMutation } from '@/services/task/task.queries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -168,7 +166,6 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
                       onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>

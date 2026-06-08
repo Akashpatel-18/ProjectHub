@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { AlertCircle, ArrowRight, CheckCircle2, Loader2, Briefcase, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { Briefcase, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { useState } from 'react';
 
 import api from '../lib/axios';
@@ -18,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const resetSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
@@ -130,7 +130,7 @@ export default function ResetPasswordPage() {
         <CardContent className="pb-8 px-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              
+
               <FormField
                 control={form.control}
                 name="password"
@@ -168,8 +168,8 @@ export default function ResetPasswordPage() {
                 )}
               />
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 font-semibold text-xs py-5"
                 disabled={resetMutation.isPending}
               >

@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { Users, UserPlus, ShieldAlert, Trash2, Mail, Shield, UserCog, Crown, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,9 +71,7 @@ export function ProjectMembersTab({
   workspaceMembers,
   projectRoles,
   currentUser,
-  isWorkspaceOwner,
   canManageProjectMembers,
-  isProjectAdmin
 }: ProjectMembersTabProps) {
   const [addMemberOpen, setAddMemberOpen] = React.useState(false);
   const [changeRoleTarget, setChangeRoleTarget] = React.useState<{ userId: string; name: string; currentRoleId: string } | null>(null);

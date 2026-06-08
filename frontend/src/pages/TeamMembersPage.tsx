@@ -25,7 +25,7 @@ export default function TeamMembersPage() {
 
   // ── Queries ──────────────────────────────────────────────────────────────────
   const { data: members, isLoading: loadingMembers } = useWorkspaceMembersQuery(slug!);
-  const { data: invites, isLoading: loadingInvites } = usePendingInvitesQuery(slug!);
+  const { data: invites } = usePendingInvitesQuery(slug!);
   const { data: roles } = useWorkspaceRolesQuery(slug!);
 
   const removeMutation = useRemoveWorkspaceMemberMutation(slug!);
