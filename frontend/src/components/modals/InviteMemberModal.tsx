@@ -79,7 +79,7 @@ export function InviteMemberModal({ slug, open, onOpenChange, isOwner, invitable
                 <Input placeholder="collaborator@company.com" {...inviteForm.register('email')} className="pl-9 bg-background/50 border-border/50" />
               </div>
               {inviteForm.formState.errors.email && (
-                <p className="text-[10px] font-medium text-destructive">{inviteForm.formState.errors.email.message}</p>
+                <p className="text-xs font-medium text-destructive">{inviteForm.formState.errors.email.message}</p>
               )}
             </div>
 
@@ -107,7 +107,7 @@ export function InviteMemberModal({ slug, open, onOpenChange, isOwner, invitable
                 )}
               />
               {inviteForm.formState.errors.roleId && (
-                <p className="text-[10px] font-medium text-destructive">{inviteForm.formState.errors.roleId.message}</p>
+                <p className="text-xs font-medium text-destructive">{inviteForm.formState.errors.roleId.message}</p>
               )}
             </div>
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -39,6 +40,7 @@ interface CreateTaskModalProps {
 
 export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMembers }: CreateTaskModalProps) {
   const createTaskMutation = useCreateTaskMutation(slug, projectId);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
@@ -78,7 +80,7 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
             <label className="text-sm font-medium leading-none">Task Title</label>
             <Input placeholder="E.g., Implement login page" {...form.register('title')} className="bg-background/50 border-border/50" />
             {form.formState.errors.title && (
-              <p className="text-[10px] font-medium text-destructive">{form.formState.errors.title.message}</p>
+              <p className="text-xs font-medium text-destructive">{form.formState.errors.title.message}</p>
             )}
           </div>
 
@@ -86,7 +88,7 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
             <label className="text-sm font-medium leading-none">Description</label>
             <Input placeholder="Optional task description..." {...form.register('description')} className="bg-background/50 border-border/50" />
             {form.formState.errors.description && (
-              <p className="text-[10px] font-medium text-destructive">{form.formState.errors.description.message}</p>
+              <p className="text-xs font-medium text-destructive">{form.formState.errors.description.message}</p>
             )}
           </div>
 
@@ -111,7 +113,7 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
                 )}
               />
               {form.formState.errors.priority && (
-                <p className="text-[10px] font-medium text-destructive">{form.formState.errors.priority.message}</p>
+                <p className="text-xs font-medium text-destructive">{form.formState.errors.priority.message}</p>
               )}
             </div>
 
@@ -137,7 +139,7 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
                 )}
               />
               {form.formState.errors.assigneeId && (
-                <p className="text-[10px] font-medium text-destructive">{form.formState.errors.assigneeId.message}</p>
+                <p className="text-xs font-medium text-destructive">{form.formState.errors.assigneeId.message}</p>
               )}
             </div>
           </div>
@@ -148,7 +150,7 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
               name="dueDate"
               control={form.control}
               render={({ field }) => (
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -165,14 +167,17 @@ export function CreateTaskModal({ slug, projectId, open, onOpenChange, projectMe
                     <Calendar
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                      onSelect={(date) => {
+                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                        setIsCalendarOpen(false);
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
               )}
             />
             {form.formState.errors.dueDate && (
-              <p className="text-[10px] font-medium text-destructive">{form.formState.errors.dueDate.message}</p>
+              <p className="text-xs font-medium text-destructive">{form.formState.errors.dueDate.message}</p>
             )}
           </div>
 

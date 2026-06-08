@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
       <div className="absolute top-[-20%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
 
-      <Card className="w-full max-w-md relative z-10 border-border/50 bg-card/45 backdrop-blur-xl shadow-2xl animate-in zoom-in-95 duration-300">
+      <Card className="w-full max-w-md relative z-10 border-transparent bg-transparent shadow-none sm:border-border/50 sm:bg-card/45 sm:backdrop-blur-xl sm:shadow-2xl animate-in zoom-in-95 duration-300">
         <CardHeader className="space-y-3 text-center pt-8">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 mb-2">
             <Briefcase className="w-6 h-6 text-primary" />
@@ -139,11 +139,11 @@ export default function ResetPasswordPage() {
                     <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input placeholder="••••••••" type={showPassword ? "text" : "password"} {...field} className="bg-background/50 border-border/50 text-xs h-9 pr-10" />
+                        <Input placeholder="••••••••" type={showPassword ? "text" : "password"} {...field} className="bg-background/50 border-border/50 text-sm h-10 pr-10" />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-2 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
@@ -161,7 +161,7 @@ export default function ResetPasswordPage() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="••••••••" type="password" {...field} className="bg-background/50 border-border/50 text-xs h-9" />
+                      <Input placeholder="••••••••" type="password" {...field} className="bg-background/50 border-border/50 text-sm h-10" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -66,14 +66,14 @@ export function CreateProjectModal({ slug, open, onOpenChange }: CreateProjectMo
             <label className="text-sm font-medium leading-none">Project Name</label>
             <Input placeholder="e.g., Q3 Marketing Campaign" {...form.register('name')} />
             {form.formState.errors.name && (
-              <p className="text-[10px] font-medium text-destructive">{form.formState.errors.name.message}</p>
+              <p className="text-xs font-medium text-destructive">{form.formState.errors.name.message}</p>
             )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none">Description <span className="text-muted-foreground font-normal">(optional)</span></label>
             <Input placeholder="Brief overview of the project goals" {...form.register('description')} />
             {form.formState.errors.description && (
-              <p className="text-[10px] font-medium text-destructive">{form.formState.errors.description.message}</p>
+              <p className="text-xs font-medium text-destructive">{form.formState.errors.description.message}</p>
             )}
           </div>
           <DialogFooter className="mt-6">

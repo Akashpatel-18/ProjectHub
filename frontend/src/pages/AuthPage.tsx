@@ -36,7 +36,7 @@ export default function AuthPage() {
 
   const [mode, setMode] = useState<AuthMode>(defaultEmail ? 'signup' : 'login');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
   const { toast } = useToast();
@@ -154,7 +154,7 @@ export default function AuthPage() {
       {/* <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-accent/10 blur-[120px] pointer-events-none" /> */}
 
-      <Card className="w-full max-w-md relative z-10 border-border/50 bg-card/45 backdrop-blur-xl shadow-2xl animate-in zoom-in-95 duration-300">
+      <Card className="w-full max-w-md relative z-10 border-transparent bg-transparent shadow-none sm:border-border/50 sm:bg-card/45 sm:backdrop-blur-xl sm:shadow-2xl animate-in zoom-in-95 duration-300">
         <CardHeader className="space-y-3 text-center pt-8">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 mb-2">
             <Briefcase className="w-6 h-6 text-primary" />
@@ -175,14 +175,14 @@ export default function AuthPage() {
             <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Email Address</label>
-                <Input 
-                  placeholder="name@company.com" 
-                  type="email" 
-                  {...loginForm.register('email')} 
-                  className="bg-background/50 border-border/50 text-xs h-9" 
+                <Input
+                  placeholder="name@company.com"
+                  type="email"
+                  {...loginForm.register('email')}
+                  className="bg-background/50 border-border/50 text-sm h-10"
                 />
                 {loginForm.formState.errors.email && (
-                  <p className="text-[10px] font-medium text-destructive">{loginForm.formState.errors.email.message}</p>
+                  <p className="text-xs font-medium text-destructive">{loginForm.formState.errors.email.message}</p>
                 )}
               </div>
 
@@ -198,22 +198,22 @@ export default function AuthPage() {
                   </button>
                 </div>
                 <div className="relative">
-                  <Input 
-                    placeholder="••••••••" 
-                    type={showPassword ? "text" : "password"} 
-                    {...loginForm.register('password')} 
-                    className="bg-background/50 border-border/50 text-xs h-9 pr-10" 
+                  <Input
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    {...loginForm.register('password')}
+                    className="bg-background/50 border-border/50 text-sm h-10 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {loginForm.formState.errors.password && (
-                  <p className="text-[10px] font-medium text-destructive">{loginForm.formState.errors.password.message}</p>
+                  <p className="text-xs font-medium text-destructive">{loginForm.formState.errors.password.message}</p>
                 )}
               </div>
 
@@ -231,48 +231,48 @@ export default function AuthPage() {
             <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Full Name</label>
-                <Input 
-                  placeholder="John Doe" 
-                  {...signupForm.register('name')} 
-                  className="bg-background/50 border-border/50 text-xs h-9" 
+                <Input
+                  placeholder="John Doe"
+                  {...signupForm.register('name')}
+                  className="bg-background/50 border-border/50 text-sm h-10"
                 />
                 {signupForm.formState.errors.name && (
-                  <p className="text-[10px] font-medium text-destructive">{signupForm.formState.errors.name.message}</p>
+                  <p className="text-xs font-medium text-destructive">{signupForm.formState.errors.name.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Email Address</label>
-                <Input 
-                  placeholder="name@company.com" 
-                  type="email" 
-                  {...signupForm.register('email')} 
-                  className="bg-background/50 border-border/50 text-xs h-9" 
+                <Input
+                  placeholder="name@company.com"
+                  type="email"
+                  {...signupForm.register('email')}
+                  className="bg-background/50 border-border/50 text-sm h-10"
                 />
                 {signupForm.formState.errors.email && (
-                  <p className="text-[10px] font-medium text-destructive">{signupForm.formState.errors.email.message}</p>
+                  <p className="text-xs font-medium text-destructive">{signupForm.formState.errors.email.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Password</label>
                 <div className="relative">
-                  <Input 
-                    placeholder="••••••••" 
-                    type={showPassword ? "text" : "password"} 
-                    {...signupForm.register('password')} 
-                    className="bg-background/50 border-border/50 text-xs h-9 pr-10" 
+                  <Input
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    {...signupForm.register('password')}
+                    className="bg-background/50 border-border/50 text-sm h-10 pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {signupForm.formState.errors.password && (
-                  <p className="text-[10px] font-medium text-destructive">{signupForm.formState.errors.password.message}</p>
+                  <p className="text-xs font-medium text-destructive">{signupForm.formState.errors.password.message}</p>
                 )}
               </div>
 
@@ -292,14 +292,14 @@ export default function AuthPage() {
                 <label className="text-sm font-medium leading-none">Verify Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="collaborator@company.com" 
-                    {...forgotForm.register('email')} 
-                    className="pl-9 bg-background/50 border-border/50 text-xs h-9" 
+                  <Input
+                    placeholder="collaborator@company.com"
+                    {...forgotForm.register('email')}
+                    className="pl-9 bg-background/50 border-border/50 text-sm h-10"
                   />
                 </div>
                 {forgotForm.formState.errors.email && (
-                  <p className="text-[10px] font-medium text-destructive">{forgotForm.formState.errors.email.message}</p>
+                  <p className="text-xs font-medium text-destructive">{forgotForm.formState.errors.email.message}</p>
                 )}
               </div>
 

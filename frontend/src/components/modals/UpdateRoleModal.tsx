@@ -87,7 +87,7 @@ export function UpdateRoleModal({ slug, target, onClose, changeableRoles }: Upda
               )}
             />
             {changeRoleForm.formState.errors.roleId && (
-              <p className="text-[10px] font-medium text-destructive">{changeRoleForm.formState.errors.roleId.message}</p>
+              <p className="text-xs font-medium text-destructive">{changeRoleForm.formState.errors.roleId.message}</p>
             )}
           </div>
           <DialogFooter>

@@ -229,7 +229,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     />
                   </div>
                   {form.formState.errors.name && (
-                    <p className="text-[10px] font-medium text-destructive">{form.formState.errors.name.message}</p>
+                    <p className="text-xs font-medium text-destructive">{form.formState.errors.name.message}</p>
                   )}
                 </div>
 
@@ -246,7 +246,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     />
                   </div>
                   {form.formState.errors.slug && (
-                    <p className="text-[10px] font-medium text-destructive">{form.formState.errors.slug.message}</p>
+                    <p className="text-xs font-medium text-destructive">{form.formState.errors.slug.message}</p>
                   )}
                 </div>
 
@@ -355,7 +355,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {/* Sidebar Panel */}
       <aside
         className={cn(
-          "lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-card flex flex-col h-full text-card-foreground shadow-2xl sidebar-panel",
+          "lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-card flex flex-col h-full text-card-foreground shadow-2xl sidebar-panel pointer-events-auto",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
