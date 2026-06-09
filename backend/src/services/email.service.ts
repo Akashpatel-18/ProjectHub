@@ -43,7 +43,7 @@ export async function sendWorkspaceInviteEmail(payload: {
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: `"SaaS PM System" <no-reply@pms.net>`,
+        from: `"ProjectHub" <${ENV.GMAIL_USER}>`,
         to: payload.toEmail,
         subject,
         html,
@@ -100,7 +100,7 @@ export async function sendPasswordResetEmail(payload: {
   if (transporter) {
     try {
       await transporter.sendMail({
-        from: `"SaaS PM System" <no-reply@pms.net>`,
+        from: `"ProjectHub" <${ENV.GMAIL_USER}>`,
         to: payload.toEmail,
         subject,
         html,
