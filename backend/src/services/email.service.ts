@@ -1,16 +1,8 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { ENV } from "../config/env";
 
-const transporter =
-  ENV.GMAIL_USER && ENV.GMAIL_PASS
-    ? nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: ENV.GMAIL_USER,
-          pass: ENV.GMAIL_PASS,
-        },
-      })
-    : null;
+const resend = ENV.RESEND_API_KEY ? new Resend(ENV.RESEND_API_KEY) : null;
+const FROM_EMAIL = "ProjectHub <no-reply@taskivo.in>";
 
 export async function sendWorkspaceInviteEmail(payload: {
   toEmail: string;
@@ -35,32 +27,32 @@ export async function sendWorkspaceInviteEmail(payload: {
       </p>
       <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
       <p style="font-size: 12px; color: #9ca3af; text-align: center;">
-        This email was sent dynamically by SaaS Project Management System.
+        This email was sent dynamically by ProjectHub.
       </p>
     </div>
   `;
 
-  if (transporter) {
-    try {
-      await transporter.sendMail({
-        from: `"ProjectHub" <${ENV.GMAIL_USER}>`,
-        to: payload.toEmail,
-        subject,
-        html,
-      });
-      console.log(
-        `✉️ Workspace invite email successfully sent via Nodemailer to: ${payload.toEmail}`,
-      );
-      return;
-    } catch (error) {
-      console.error("❌ Error sending via Nodemailer:", error);
+  if (resend) {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: payload.toEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("❌ Error sending via Resend:", error);
+      throw error; // Throwing ensures BullMQ marks it as failed and retries
     }
+
+    console.log(`✉️ Workspace invite email successfully sent via Resend to: ${payload.toEmail}`);
+    return;
   }
 
   // Fallback beautiful console logger
   console.log(`
 ┌──────────────────────────────────────────────────────────┐
-│ ✉️  [MOCK EMAIL LOG - NODEMAILER NOT CONFIGURED]         │
+│ ✉️  [MOCK EMAIL LOG - RESEND NOT CONFIGURED]             │
 ├──────────────────────────────────────────────────────────┤
 │ To: ${payload.toEmail.padEnd(52)} │
 │ Subject: ${subject.padEnd(47)} │
@@ -92,32 +84,32 @@ export async function sendPasswordResetEmail(payload: {
       </p>
       <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
       <p style="font-size: 12px; color: #9ca3af; text-align: center;">
-        This email was sent dynamically by SaaS Project Management System.
+        This email was sent dynamically by ProjectHub.
       </p>
     </div>
   `;
 
-  if (transporter) {
-    try {
-      await transporter.sendMail({
-        from: `"ProjectHub" <${ENV.GMAIL_USER}>`,
-        to: payload.toEmail,
-        subject,
-        html,
-      });
-      console.log(
-        `✉️ Reset password email successfully sent via Nodemailer to: ${payload.toEmail}`,
-      );
-      return;
-    } catch (error) {
-      console.error("❌ Error sending via Nodemailer:", error);
+  if (resend) {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: payload.toEmail,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("❌ Error sending via Resend:", error);
+      throw error; // Throwing ensures BullMQ marks it as failed and retries
     }
+
+    console.log(`✉️ Reset password email successfully sent via Resend to: ${payload.toEmail}`);
+    return;
   }
 
   // Fallback beautiful console logger
   console.log(`
 ┌──────────────────────────────────────────────────────────┐
-│ ✉️  [MOCK EMAIL LOG - NODEMAILER NOT CONFIGURED]         │
+│ ✉️  [MOCK EMAIL LOG - RESEND NOT CONFIGURED]             │
 ├──────────────────────────────────────────────────────────┤
 │ To: ${payload.toEmail.padEnd(52)} │
 │ Subject: ${subject.padEnd(47)} │

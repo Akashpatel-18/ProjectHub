@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tasksDueToday = tasksData?.filter((t: any) => {
-    if (!t.dueDate) return false;
+    if (!t.dueDate || t.assigneeId !== user?.id) return false;
     const due = new Date(t.dueDate);
     due.setHours(0, 0, 0, 0);
     return due.getTime() === today.getTime();
